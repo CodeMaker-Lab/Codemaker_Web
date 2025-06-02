@@ -3,34 +3,66 @@ import LogoWall from "../components/logoWall.astro";
 import LetterEffect from "../components/LetterEffect.astro";
 ---
 
-<section class="text-[var(--white)] mt-12 md:mt-20" id="home">
+<section class="bg-[--background-dark] text-[--text-light] p-10" id="home">
   <div class="max-w-5xl mx-auto space-y-8 py-12 md:py-20">
     <div class="flex flex-col lg:flex-row items-center gap-8">
       <!-- Text on the left -->
       <div class="flex flex-col w-full lg:w-1/2 space-y-4 text-left">
-        <h1 class="text-[var(--white)] text-5xl md:text-6xl font-medium text-pretty leading-none">
-          <span class="text-[var(--sec)] shiny-sec"> CodeMaker_ <br /></span>
+        <h1
+          class="text-[var(--white)] text-5xl md:text-6xl font-medium text-pretty leading-none"
+        >
+          <span> CodeMaker_ <br /></span>
         </h1>
         <p class="text-md md:text-2xl text-[var(--white-icon)]">
-          Proyecto de innovación educativa sobre programación, robótica, 3D e inteligencia artificial.
+          Proyecto de innovación educativa sobre programación, robótica, 3D e
+          inteligencia artificial.
         </p>
       </div>
 
       <!-- LetterEffect on the right -->
-      <div class="flex justify-center w-full lg:w-1/2 md:h-[292px] size-[290px] pt-3 md:pt-9">
+      <div
+        class="flex justify-center w-full lg:w-1/2 md:h-[292px] size-[290px] pt-3 md:pt-9"
+      >
         <LetterEffect />
       </div>
     </div>
-
-    <div class="flex justify-center w-full lg:w-1/2 h-auto py-4 mt-4">
+    <div class="pt-5">
       <LogoWall />
     </div>
   </div>
+
+    <div class="w-full max-w-5xl mx-auto grid grid-cols-3 grid-rows-2 gap-4 h-[400px] mb-16">
+      <!-- Imagen 1 (grande, 2 columnas, 1 fila) -->
+      <div class="relative col-span-2 row-span-1 rounded-xl flex items-center justify-center">
+        <img src="../Alumnos1.jpg" alt="Imagen 1" class="object-cover w-full h-full rounded-xl">
+        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
+      </div>
+  
+      <!-- Imagen 2 -->
+      <div class="relative col-span-1 row-span-1 rounded-xl flex items-center justify-center">
+        <img src="../Alumnos2.jpg" alt="Imagen 2" class="object-cover w-full h-full rounded-xl">
+        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
+      </div>
+  
+      <!-- Imagen 3 -->
+      <div class="relative col-span-1 row-span-1 rounded-xl flex items-center justify-center">
+        <img src="../Alumnos3.jpg" alt="Imagen 3" class="object-cover w-full h-full rounded-xl">
+        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
+      </div>
+  
+      <!-- Imagen 4 -->
+      <div class="relative col-span-2 row-span-1 rounded-xl flex items-center justify-center">
+        <img src="../Alumnos4.jpg" alt="Imagen 4" class="object-cover w-full h-full rounded-xl">
+        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
+      </div>
+
+    </div>
+  
 </section>
 
 <style is:global>
   .shiny-sec {
-    background: linear-gradient(135deg, #a476ff 25%, #eee5ff 50%, #a476ff 75%);
+    background: linear-gradient(135deg, #22c55e 25%, #38bdf8 50%, #facc15 75%);
     background-size: 400% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -42,7 +74,8 @@ import LetterEffect from "../components/LetterEffect.astro";
     0% {
       background-position: 100% 50%;
     }
-    30%, 70% {
+    30%,
+    70% {
       background-position: 0% 50%;
     }
     100% {

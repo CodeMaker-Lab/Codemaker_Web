@@ -3,10 +3,11 @@ import Clientes from "../components/clientesWall.astro";
 ---
 <section
   id="cursos"
-  class="py-12 border-t border-[#ffffff10] text-[var(--white)]"
+  class=" bg-[--background-light] py-12 border-t text-[--text-dark] p-10 patron-puntos"
+
 >
-  <div class="max-w-5xl mx-auto">
-    <h2 class="text-lg text-[var(--sec)] mb-2 shiny-sec">Consulta nuestros cursos y actividades extraescolares</h2>
+  <div class="max-w-5xl mx-auto ">
+    <h2 class="text-lg text-[var(--sec)] mb-2 shiny-sec-text-edu">Consulta nuestros cursos y actividades extraescolares</h2>
     <h3 class="text-4xl md:text-5xl font-medium mb-8">Cursos y Actividades extraescolares</h3>
     <h4 class="text-md md:text-lg text-left md:text-left">
       CodeMaker es un innovador proyecto educativo, dirigido a alumnos de primaria y secundaria, que engloba todas las nuevas tecnologías que están marcando tendencia y que se prevé que tengan un mayor impacto en la sociedad (programación, robótica, impresión 3D, Inteligencia Artificial), a la vez que fomenta capacidades como la creatividad, el razonamiento lógico y las consideradas habilidades STEAM.
@@ -17,9 +18,9 @@ import Clientes from "../components/clientesWall.astro";
 
     <div class="flex flex-col items-center gap-6">
       <!-- Vídeo con borde animado -->
-      <div class="w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mb-4">
-        <div class="relative rounded-2xl p-[2px] shiny-sec-border">
-          <div class="rounded-[0.9rem] overflow-hidden bg-black h-96">
+      <div class="w-full rounded-2xl overflow-hidden shadow-lg mb-4">
+        <div class="relative rounded-2xl p-[2px] shiny-sec-border-edu">
+          <div class="rounded-[0.9rem] overflow-hidden bg-slate-100 h-96">
             <video
               src="/videos/presentacion-codemaker.mp4"
               autoplay
@@ -28,7 +29,7 @@ import Clientes from "../components/clientesWall.astro";
               playsinline
               class="w-full h-full object-cover object-center"
             ></video>
-            <div class="absolute inset-0 bg-black/60 pointer-events-none"></div>
+            <div class="absolute inset-0 bg-slate-500/60 pointer-events-none"></div>
           </div>
         </div>
       </div>
@@ -44,8 +45,6 @@ import Clientes from "../components/clientesWall.astro";
         <div class="flex flex-col items-center gap-4 w-full relative overflow-x-hidden">
           <!-- Clientes con efecto degradado lateral -->
           <div class="relative w-full">
-            <div class="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[var(--background)] to-transparent z-10 pointer-events-none"></div>
-            <div class="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[var(--background)] to-transparent z-10 pointer-events-none"></div>
             <Clientes />
           </div>
 
@@ -54,7 +53,7 @@ import Clientes from "../components/clientesWall.astro";
             target="_blank"
             href="https://codemaker.es/actividades"
             aria-label="Ver actividades"
-            class="w-full text-center inline-flex justify-center items-center text-[var(--white-icon)] hover:text-white transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-6 py-3 rounded-xl bg-[#1414149c] hover:bg-[var(--white-icon-tr)]"
+            class="w-full text-center inline-flex justify-center items-center text-slate-950 hover:text-slate-950 transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-6 py-3 rounded-xl bg-slate-200 hover:bg-slate-300"
           >
             Ver actividades, centros y horarios
             <svg
@@ -70,16 +69,47 @@ import Clientes from "../components/clientesWall.astro";
       </div>
     </div>
   </div>
+</div>
+
+
 </section>
 
 <style is:global>
-  .shiny-sec-border {
-    background: linear-gradient(135deg, #a476ff 25%, #eee5ff 50%, #a476ff 75%);
+
+.patron-puntos {
+  background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+  background-size: 10px 10px;
+}
+
+
+  .shiny-sec-border-edu {
+    background: linear-gradient(135deg, #020617 25%, #FAFAFA 50%, #020617 75%);
     background-size: 400%;
-    animation: shine-border-bg 6s linear infinite;
+    animation: shine-border-edu 6s linear infinite;
   }
 
-  @keyframes shine-border-bg {
+  @keyframes shine-border-edu {
+    0% {
+      background-position: 100% 50%;
+    }
+    30%, 70% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .shiny-sec-text-edu {
+    background: linear-gradient(135deg, #020617 25%, #FAFAFA 50%, #020617 75%);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine-text-edu 3s linear infinite;
+  }
+
+  @keyframes shine-text-edu {
     0% {
       background-position: 100% 50%;
     }

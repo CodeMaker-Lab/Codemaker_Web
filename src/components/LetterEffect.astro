@@ -4,42 +4,47 @@ const glitchSpeed = 33;
 const centerVignette = false;
 const outerVignette = false;
 const smooth = true;
-
-const glitchColorsSerialized = JSON.stringify(glitchColors);
+const highlightColor = "#ffffff";
 ---
-
-<div class="relative w-full h-full bg-[#101010] overflow-hidden">
+<div class="relative w-full h-full bg-slate-950 overflow-hidden">
   <canvas id="letter-glitch-canvas" class="block w-full h-full"></canvas>
 
-  {outerVignette && (
+  {outerVignette ? (
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(16,16,16,0)_60%,_rgba(16,16,16,1)_100%)]"></div>
-  )}
-  {centerVignette && (
+  ) : null}
+  {centerVignette ? (
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.8)_0%,_rgba(0,0,0,0)_60%)]"></div>
-  )}
+  ) : null}
 
-  <!-- Difuminado por los lados -->
-  <div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[linear-gradient(to_right,_rgba(16,16,16,1)_0%,_rgba(16,16,16,0)_20%,_rgba(16,16,16,0)_80%,_rgba(16,16,16,1)_100%)]"></div>
+<div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[linear-gradient(to_right,_#020617_0%,_transparent_20%,_transparent_80%,_#020617_100%)]"></div>
 
   <script type="module" is:inline>
     const canvas = document.getElementById("letter-glitch-canvas");
     const context = canvas.getContext("2d");
-
-    const glitchColors = ["#5e4491", "#A476FF", "#241a38"]; // Usar directamente el array
-    const glitchSpeed = 33; // Usar directamente el valor
-    const smooth = true; // Usar directamente el valor
+    const glitchColors = ["#1e293b", "#334155", "#94a3b8"] /*["#5e4491", "#A476FF", "#241a38"]*/;
+    const glitchSpeed = 33;
+    const smooth = true;
     const fontSize = 16;
     const charWidth = 10;
     const charHeight = 20;
+    const highlightColor = "#ffffff";
+    const words = ["Programacion", "Robotica", "3D", "IA"];
+    const messageDuration = 5000;
 
     const lettersAndSymbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>,0123456789".split("");
     let grid = { columns: 0, rows: 0 };
     let letters = [];
     let animationFrame;
     let lastGlitchTime = Date.now();
+    let currentWordIndex = 0;
 
-    const getRandomChar = () => lettersAndSymbols[Math.floor(Math.random() * lettersAndSymbols.length)];
-    const getRandomColor = () => glitchColors[Math.floor(Math.random() * glitchColors.length)];
+    function getRandomChar() {
+      return lettersAndSymbols[Math.floor(Math.random() * lettersAndSymbols.length)];
+    }
+
+    function getRandomColor() {
+      return glitchColors[Math.floor(Math.random() * glitchColors.length)];
+    }
 
     function hexToRgb(hex) {
       hex = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (_, r, g, b) => r + r + g + g + b + b);
@@ -68,13 +73,16 @@ const glitchColorsSerialized = JSON.stringify(glitchColors);
         char: getRandomChar(),
         color: getRandomColor(),
         targetColor: getRandomColor(),
-        colorProgress: 1
+        colorProgress: 1,
+        locked: false,
+        originalColor: null,
+        isMessageChar: false
       }));
     }
 
     function resizeCanvas() {
       const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect(); // Cambiado de parentElement para mayor precisión
+      const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       canvas.style.width = rect.width + "px";
@@ -102,14 +110,22 @@ const glitchColorsSerialized = JSON.stringify(glitchColors);
       const count = Math.max(1, Math.floor(letters.length * 0.05));
       for (let i = 0; i < count; i++) {
         const index = Math.floor(Math.random() * letters.length);
-        letters[index].char = getRandomChar();
-        letters[index].targetColor = getRandomColor();
-        if (!smooth) {
-          letters[index].color = letters[index].targetColor;
-          letters[index].colorProgress = 1;
-        } else {
-          letters[index].colorProgress = 0;
+        const letter = letters[index];
+        if (letter.locked) continue;
+
+        if (letter.isMessageChar) {
+          letter.isMessageChar = false;
+          letter.locked = false;
+          if (letter.originalColor) {
+            letter.targetColor = letter.originalColor;
+            letter.colorProgress = 0;
+          }
         }
+
+        letter.char = getRandomChar();
+        letter.targetColor = getRandomColor();
+        letter.colorProgress = smooth ? 0 : 1;
+        if (!smooth) letter.color = letter.targetColor;
       }
     }
 
@@ -128,6 +144,90 @@ const glitchColorsSerialized = JSON.stringify(glitchColors);
         }
       });
       if (needsRedraw) drawLetters();
+    }
+
+    function showWord(word) {
+      const safeCols = [3, grid.columns - word.length - 3];
+      const safeRows = [3, grid.rows - 1 - 3];
+      const row = Math.floor(Math.random() * (safeRows[1] - safeRows[0] + 1)) + safeRows[0];
+      const startCol = Math.floor(Math.random() * (safeCols[1] - safeCols[0] + 1)) + safeCols[0];
+
+      const positions = word.split('').map((char, i) => {
+        return {
+          index: row * grid.columns + startCol + i,
+          char
+        };
+      });
+
+      shuffleArray(positions);
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < positions.length) {
+          const letter = letters[positions[i].index];
+          if (!letter) return;
+          letter.originalColor = letter.originalColor || letter.color;
+          letter.char = positions[i].char;
+          letter.color = highlightColor;
+          letter.targetColor = highlightColor;
+          letter.colorProgress = 1;
+          letter.locked = true;
+          letter.isMessageChar = true;
+          drawLetters();
+          i++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => fadeWord(positions), messageDuration);
+        }
+      }, 120);
+    }
+
+    function fadeWord(positions) {
+  shuffleArray(positions);
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < positions.length) {
+      const pos = positions[i];
+      const letter = letters[pos.index];
+      if (!letter) return;
+
+      letter.locked = false;
+      letter.isMessageChar = false;
+
+      // Restaurar color original suavemente
+      if (letter.originalColor) {
+        letter.targetColor = letter.originalColor;
+        letter.colorProgress = 0;
+
+        // Aplaza el cambio de letra hasta que el color se haya restaurado
+        setTimeout(() => {
+          if (!letter.isMessageChar && !letter.locked) {
+            letter.char = getRandomChar();
+            letter.color = letter.targetColor;
+            letter.originalColor = null;
+            letter.targetColor = getRandomColor();
+            letter.colorProgress = 0;
+          }
+        }, 300); // suficiente para la transición visual
+      } else {
+        letter.char = getRandomChar();
+        letter.targetColor = getRandomColor();
+        letter.colorProgress = 0;
+      }
+
+      drawLetters();
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 120);
+}
+
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
     }
 
     function animate() {
@@ -149,5 +249,11 @@ const glitchColorsSerialized = JSON.stringify(glitchColors);
 
     resizeCanvas();
     animate();
+
+    setInterval(() => {
+      const word = words[currentWordIndex];
+      showWord(word);
+      currentWordIndex = (currentWordIndex + 1) % words.length;
+    }, messageDuration + 2000);
   </script>
 </div>
