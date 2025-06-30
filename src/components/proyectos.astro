@@ -2,32 +2,28 @@
 
 ---
 
-<section id="proyectos" class="bg-[--background-dark] w-full py-12 border-t text-[--text-light] p-10">
+<section id="proyectos" class="bg-[--background-dark] w-full py-20 px-10 border-t text-[--text-light]">
   <div class="max-w-5xl mx-auto">
-    <h2 class="text-lg text-[var(--sec)] mb-2 shiny-sec-text-dev">
-      Proyectos de software para entidades educativas
-    </h2>
+    <h2 class="text-lg font-bold mb-2 shiny-sec-text-dev">CodeMaker_Dev</h2>
     <h3 class="text-4xl md:text-5xl font-medium text-[var(--white)] mb-8">
-      Proyectos web y aplicaciones educativas
+      Herramientas interactivas para el aprendizaje
     </h3>
     <h4 class="text-md md:text-lg text-left md:text-left">
-      En el equipo de desarrollo de CodeMaker desarrollamos páginas webs,
-      aplicaciones y videojuegos centrados en educación, mejorando tanto la
-      gestión educativa como creando una experiencia de aprendizaje divertida y
-      atractiva para los alumnos.
+      En CodeMaker combinamos el uso de algunos de los
+      <span class="font-bold  text-purple-500">programas más importantes en educación y en el ámbito profesional</span>,
+      con aplicaciones creadas por nuestros desarrolladores que se adaptan a las necesidades de nuestros alumnos y alumnas.
+      Esto nos permite contar con aplicaciones de
+      <span class="font-bold text-fuchsia-500">Diseño 3D, Programación y Robótica</span>
+      con las que crear una experiencia de aprendizaje interactiva y atractiva para los alumnos.
     </h4>
     <br />
     <br />
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Tarjeta 1 -->
+      <!-- Tarjeta 1 
       <div class="flex flex-col items-center text-center space-y-3">
         <div
           class="w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mb-2"
         >
-          <!-- Contenedor con borde -->
           <div class="relative rounded-2xl p-[2px] shiny-sec-border-dev">
-            <!-- Contenedor interior negro con imagen y filtro -->
             <div class="rounded-[0.9rem] overflow-hidden bg-slate-950">
               <img
                 src="../images/web.png"
@@ -43,16 +39,14 @@
         <span class="text-sm">
           Páginas webs para centros educativos
         </span>
-      </div>
+      </div> -->
 
-      <!-- Tarjeta 2 -->
+      <!-- Tarjeta 2 
       <div class="flex flex-col items-center text-center space-y-3">
         <div
           class="w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mb-2"
         >
-          <!-- Contenedor con borde -->
           <div class="relative rounded-2xl p-[2px] shiny-sec-border-dev">
-            <!-- Contenedor interior negro con imagen y filtro -->
             <div class="rounded-[0.9rem] overflow-hidden bg-slate-950">
               <img
                 src="../images/gestion.png"
@@ -68,9 +62,9 @@
         <span class="text-sm">
           Plataformas educativas y de gestión
         </span>
-      </div>
+      </div> -->
 
-      <!-- Tarjeta 1 -->
+      <!-- Tarjeta 3 -->
       <div class="flex flex-col items-center text-center space-y-3">
         <div
           class="w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mb-2"
@@ -82,7 +76,7 @@
               <img
                 src="../images/videojuego.png"
                 alt="Proyecto 1"
-                class="w-full h-32 md:h-48 object-cover"
+                class="w-full h-64 md:h-72 object-cover"
                 loading="lazy"
               />
               <div class="absolute inset-0 bg-slate-950/60 pointer-events-none">
@@ -90,29 +84,24 @@
             </div>
           </div>
         </div>
-        <span class="text-sm">
-          Videojuegos y simuladores educativos
-        </span>
       </div>
-    </div>
 
 
     <!-- Add horizontal space -->
     <div class="my-8"></div>
 
     <!-- Texto y botón en 2 columnas -->
-    <div class="grid grid-cols-1 md:grid-cols-2 items-center w-full px-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 items-center w-full py-6 gap-4">
       <h4 class="text-md md:text-lg text-left md:text-left">
-        Echa un vistazo a nuestros proyectos y descubre cómo podemos ayudarte a
-        mejorar la educación en tu centro.
+        Echa un vistazo a nuestros mejores proyectos
       </h4>
       <a
         target="_blank"
-        href="https://codemaker.es/actividades"
+        href=""
         aria-label="Ver actividades"
-        class="inline-flex justify-center items-center text-slate-50 px-6 py-2 rounded-xl bg-slate-900 hover:bg-slate-800"
+        class="inline-flex justify-center items-center text-slate-50 px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-800"
       >
-        Ver proyectos
+        Ver proyectos (próximamente)
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -130,7 +119,7 @@
 
 <style is:global>
   .shiny-sec-border-dev {
-    background: linear-gradient(135deg, #64748b 25%, #020617 50%, #64748b 75%);
+    background: linear-gradient(135deg, #64748b 10%, #C084FC 90%);
     background-size: 400%;
     animation: shine-border-dev 6s linear infinite;
   }
@@ -149,7 +138,7 @@
   }
 
   .shiny-sec-text-dev {
-    background: linear-gradient(135deg, #64748b 25%, #020617 50%, #64748b 75%);
+    background: linear-gradient(135deg, #64748b 10%, #C084FC 90%);
     background-size: 400% 100%;
     -webkit-background-clip: text;
     background-clip: text;

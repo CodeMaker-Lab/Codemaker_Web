@@ -1,0 +1,49 @@
+<section id="gallery" class="relative text-[--text-light] py-10 overflow-hidden">
+  <div class="absolute inset-0 bg-slate-200/60 pointer-events-none z-10"></div>
+
+  <div class="z-20 max-w-5xl mx-auto space-y-2">
+    <!-- Fila 1 -->
+    <div class="relative overflow-hidden">
+      <div class="flex animate-scroll-gallery gap-2 w-max">
+        {
+          // Duplicamos las imágenes para lograr el efecto infinito
+          [...Array(2)].flatMap(() => [
+            "/images/ImagenesAlumnos/Alumnos1.jpg",
+            "/images/ImagenesAlumnos/Alumnos2.jpg",
+            "/images/ImagenesAlumnos/Alumnos3.jpg",
+            "/images/ImagenesAlumnos/Alumnos4.jpg",
+            "/images/ImagenesAlumnos/Alumnos5.jpg"
+          ]).map((src, i) => (
+            <img
+              src={src}
+              class="h-48 rounded-md object-cover aspect-[2/1]"
+              loading="lazy"
+              alt={`Alumno ${i + 1}`}
+            />
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  @keyframes scroll-gallery {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll-gallery {
+    animation: scroll-gallery 60s linear infinite;
+  }
+
+  @media (min-width: 768px) {
+    .animate-scroll-gallery {
+      animation-duration: 50s;
+    }
+  }
+</style>

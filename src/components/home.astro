@@ -1,17 +1,21 @@
 ---
-import LogoWall from "../components/logoWall.astro";
+import TecnologiasSlide from "../components/TecnologiasSlide.astro";
 import LetterEffect from "../components/LetterEffect.astro";
 ---
 
-<section class="bg-[--background-dark] text-[--text-light] p-10" id="home">
-  <div class="max-w-5xl mx-auto space-y-8 py-12 md:py-20">
-    <div class="flex flex-col lg:flex-row items-center gap-8">
+<section 
+  class="bg-[--background-dark] text-[--text-light] p-4 xl:pt-14" 
+  id="home" 
+  style="background: radial-gradient(circle at top left, #9333EA -50%, #020617 15%);"
+>
+  <div class="max-w-5xl mx-auto space-y-8 py-16 md:py-10">
+    <div class="flex flex-col lg:flex-row items-center gap-8 p-4">
       <!-- Text on the left -->
       <div class="flex flex-col w-full lg:w-1/2 space-y-4 text-left">
         <h1
           class="text-[var(--white)] text-5xl md:text-6xl font-medium text-pretty leading-none"
         >
-          <span> CodeMaker_ <br /></span>
+          <span class="text-slate-400">Code</span><span class="shiny-sec">Maker_</span> <br />
         </h1>
         <p class="text-md md:text-2xl text-[var(--white-icon)]">
           Proyecto de innovación educativa sobre programación, robótica, 3D e
@@ -26,43 +30,29 @@ import LetterEffect from "../components/LetterEffect.astro";
         <LetterEffect />
       </div>
     </div>
-    <div class="pt-5">
-      <LogoWall />
+    
+    
+    <div class="pt-0">
+      <TecnologiasSlide />
     </div>
   </div>
 
-    <div class="w-full max-w-5xl mx-auto grid grid-cols-3 grid-rows-2 gap-4 h-[400px] mb-16">
-      <!-- Imagen 1 (grande, 2 columnas, 1 fila) -->
-      <div class="relative col-span-2 row-span-1 rounded-xl flex items-center justify-center">
-        <img src="../Alumnos1.jpg" alt="Imagen 1" class="object-cover w-full h-full rounded-xl">
-        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
-      </div>
-  
-      <!-- Imagen 2 -->
-      <div class="relative col-span-1 row-span-1 rounded-xl flex items-center justify-center">
-        <img src="../Alumnos2.jpg" alt="Imagen 2" class="object-cover w-full h-full rounded-xl">
-        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
-      </div>
-  
-      <!-- Imagen 3 -->
-      <div class="relative col-span-1 row-span-1 rounded-xl flex items-center justify-center">
-        <img src="../Alumnos3.jpg" alt="Imagen 3" class="object-cover w-full h-full rounded-xl">
-        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
-      </div>
-  
-      <!-- Imagen 4 -->
-      <div class="relative col-span-2 row-span-1 rounded-xl flex items-center justify-center">
-        <img src="../Alumnos4.jpg" alt="Imagen 4" class="object-cover w-full h-full rounded-xl">
-        <div class="absolute inset-0 bg-slate-500/60 pointer-events-none rounded-xl"></div>
-      </div>
-
-    </div>
+   
   
 </section>
 
 <style is:global>
+  .mask-fade-sides {
+  mask-image: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+}
+
+  .shiny-line {
+  background: linear-gradient(135deg, #F87171 15%, #FB923C 30%, #FACC15 45%, #4ADE80 60%, #38BDF8 75%, #C084FC 100%);
+}
+
   .shiny-sec {
-    background: linear-gradient(135deg, #22c55e 25%, #38bdf8 50%, #facc15 75%);
+    background: linear-gradient(135deg, #F87171 15%, #FB923C 30%, #FACC15 45%, #4ADE80 60%, #38BDF8 75%, #C084FC 100%);
     background-size: 400% 100%;
     -webkit-background-clip: text;
     background-clip: text;

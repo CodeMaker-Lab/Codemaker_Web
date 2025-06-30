@@ -1,0 +1,51 @@
+---
+import ClientesSlide from "../components/ClientesSlide.astro";
+---
+
+<section
+  id="colaboradores"
+  class="bg-slate-100 w-full py-10 px-10 border-t patron-puntos"
+>
+  <!-- Deslizador de clientes -->
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-lg font-bold text-slate-700">
+      <span class="text-[var(--sec)] mb-2 shiny-sec-text-edu">_</span>Centros
+    </h2>
+    <br>
+    <!-- Texto y contenido en 2 columnas -->
+
+    <div class="grid grid-cols-1 md:grid-cols-2 items-center w-full gap-8">
+      <!-- Columna izquierda -->
+        Llevamos desde 2014 colaborando con las principales entidades educativas
+        de Jaén y Andalucía. Consulta los centros donde impartimos nuestras actividades.
+
+      <!-- Columna derecha -->
+      <div
+        class="flex flex-col items-center gap-4 w-full relative overflow-x-hidden"
+      >
+        <!-- Clientes con efecto degradado lateral -->
+
+        <!-- Botón expandido -->
+        <a
+          target="_blank"
+          href=""
+          aria-label="Ver actividades"
+          class="w-full text-center inline-flex justify-center items-center text-slate-100 hover:text-slate-100 transition duration-300 ease-in-out border border-green-600 px-6 py-3 rounded-xl bg-green-600 hover:bg-green-500"
+        >
+          Ver centros y horarios curso 25/26 (próximamente)
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="ml-2 size-5"
+          >
+            <path
+              d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z"
+            ></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <ClientesSlide />
+  </div>
+</section>

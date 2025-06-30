@@ -1,15 +1,5 @@
 # Portfolio
-![OscarHernandez-portfolio](https://github.com/user-attachments/assets/e284a42b-15c5-495c-99c7-ad5c1eb3bbe7)
-![Deploy Status](https://img.shields.io/badge/Deploy-Vercel-black?style=flat&logo=vercel)
-
----
-
-[Demo](https://oscarhernandez.vercel.app/)
-
-[Astro Themes](https://astro.build/themes/details/dark-minimal/)
-
-[ReactBits Showcase](https://www.reactbits.dev/showcase) 
-
+Base theme by ![OscarHernandez-portfolio](https://github.com/user-attachments/assets/e284a42b-15c5-495c-99c7-ad5c1eb3bbe7)
 The component `<LetterGlitch \>` was taken from [ReactBits.dev](https://www.reactbits.dev/)
 
 ## **Stack**  

@@ -1,17 +1,17 @@
 ---
-import Clientes from "../components/clientesWall.astro";
+import ClientesSlide from "../components/ClientesSlide.astro";
 ---
 <section
   id="cursos"
-  class=" bg-[--background-light] py-12 border-t text-[--text-dark] p-10 patron-puntos"
+  class=" bg-[--background-light] py-12 border-t text-[--text-dark] px-10 patron-puntos"
 
 >
   <div class="max-w-5xl mx-auto ">
-    <h2 class="text-lg text-[var(--sec)] mb-2 shiny-sec-text-edu">Consulta nuestros cursos y actividades extraescolares</h2>
+    <h2 class="text-lg font-bold text-[var(--sec)] mb-2 shiny-sec-text-edu">CodeMaker_Edu</h2>
     <h3 class="text-4xl md:text-5xl font-medium mb-8">Cursos y Actividades extraescolares</h3>
-    <h4 class="text-md md:text-lg text-left md:text-left">
-      CodeMaker es un innovador proyecto educativo, dirigido a alumnos de primaria y secundaria, que engloba todas las nuevas tecnologías que están marcando tendencia y que se prevé que tengan un mayor impacto en la sociedad (programación, robótica, impresión 3D, Inteligencia Artificial), a la vez que fomenta capacidades como la creatividad, el razonamiento lógico y las consideradas habilidades STEAM.
-    </h4>
+    <div class="text-md md:text-lg text-left md:text-left">
+      CodeMaker es un innovador proyecto educativo, dirigido a <span class="font-bold text-orange-500">alumnos de primaria y secundaria</span>, que engloba todas las <span class="font-bold text-blue-500">nuevas tecnologías</span> que están marcando tendencia y que se prevé que tengan un mayor impacto en la sociedad (programación, robótica, impresión 3D, Inteligencia Artificial), a la vez que fomenta capacidades como la creatividad, el razonamiento lógico y las consideradas habilidades <span class="font-bold text-yellow-500">STEAM</span>.
+      </div>
 
     <br />
     <br />
@@ -33,29 +33,35 @@ import Clientes from "../components/clientesWall.astro";
           </div>
         </div>
       </div>
+    </div>
+
+      
+
 
       <!-- Texto y contenido en 2 columnas -->
-      <div class="grid grid-cols-1 md:grid-cols-2 items-center w-full px-3 gap-8">
+      <br />
+      <br />
+       <div>
+      <br />
+      <div class="grid grid-cols-1 md:grid-cols-2 items-center w-full gap-8">
         <!-- Columna izquierda -->
         <div class="text-md md:text-lg text-left">
-          Únete a los más de 1000 alumnos que ya han participado en nuestras actividades y cursos en diferentes entidades educativas con las que colaboramos.
+          Únete a los más de <span class="font-bold text-green-500">1000 alumnos</span> que ya han participado en nuestras actividades y cursos en diferentes entidades educativas con las que colaboramos.
         </div>
 
         <!-- Columna derecha -->
         <div class="flex flex-col items-center gap-4 w-full relative overflow-x-hidden">
           <!-- Clientes con efecto degradado lateral -->
-          <div class="relative w-full">
-            <Clientes />
-          </div>
+
 
           <!-- Botón expandido -->
           <a
             target="_blank"
-            href="https://codemaker.es/actividades"
+            href=""
             aria-label="Ver actividades"
-            class="w-full text-center inline-flex justify-center items-center text-slate-950 hover:text-slate-950 transition duration-300 ease-in-out border border-[var(--white-icon-tr)] px-6 py-3 rounded-xl bg-slate-200 hover:bg-slate-300"
+            class="w-full text-center inline-flex justify-center items-center text-slate-100 hover:text-slate-100 transition duration-300 ease-in-out border border-green-600 px-6 py-3 rounded-xl bg-green-600 hover:bg-green-500"
           >
-            Ver actividades, centros y horarios
+            Ver actividades, centros y horarios (próximamente)
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -67,7 +73,6 @@ import Clientes from "../components/clientesWall.astro";
           </a>
         </div>
       </div>
-    </div>
   </div>
 </div>
 
@@ -83,7 +88,7 @@ import Clientes from "../components/clientesWall.astro";
 
 
   .shiny-sec-border-edu {
-    background: linear-gradient(135deg, #020617 25%, #FAFAFA 50%, #020617 75%);
+    background: linear-gradient(135deg, #F87171 15%, #FB923C 30%, #FACC15 45%, #4ADE80 60%, #38BDF8 75%, #C084FC 100%);
     background-size: 400%;
     animation: shine-border-edu 6s linear infinite;
   }
@@ -101,7 +106,7 @@ import Clientes from "../components/clientesWall.astro";
   }
 
   .shiny-sec-text-edu {
-    background: linear-gradient(135deg, #020617 25%, #FAFAFA 50%, #020617 75%);
+    background: linear-gradient(135deg, #F87171 15%, #FB923C 30%, #FACC15 45%, #4ADE80 60%, #38BDF8 75%, #C084FC 100%);
     background-size: 400% 100%;
     -webkit-background-clip: text;
     background-clip: text;
