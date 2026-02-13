@@ -4,19 +4,20 @@ import LetterEffect from "../components/LetterEffect.astro";
 ---
 
 <section 
-  class="bg-[--background-dark] text-[--text-light] p-4 xl:pt-14" 
+  class="bg-[#007AFB] text-[--text-light] p-4 xl:pt-14" 
   id="home" 
-  style="background: radial-gradient(circle at top left, #9333EA -50%, #020617 15%);"
 >
   <div class="max-w-5xl mx-auto space-y-8 py-16 md:py-10">
     <div class="flex flex-col lg:flex-row items-center gap-8 p-4">
       <!-- Text on the left -->
       <div class="flex flex-col w-full lg:w-1/2 space-y-4 text-left">
-        <h1
-          class="text-[var(--white)] text-5xl md:text-6xl font-medium text-pretty leading-none"
-        >
-          <span class="text-slate-400">Code</span><span class="shiny-sec">Maker_</span> <br />
-        </h1>
+        <div class="mt-8">
+          <img 
+            src="/svg/Logo.svg" 
+            alt="CodeMaker Logo" 
+            class="h-24 md:h-24 w-auto object-contain"
+          />
+        </div>
         <p class="text-md md:text-2xl text-[var(--white-icon)]">
           Proyecto de innovación educativa sobre programación, robótica, 3D e
           inteligencia artificial.
@@ -48,11 +49,11 @@ import LetterEffect from "../components/LetterEffect.astro";
 }
 
   .shiny-line {
-  background: linear-gradient(135deg, #F87171 15%, #FB923C 30%, #FACC15 45%, #4ADE80 60%, #38BDF8 75%, #C084FC 100%);
+  background: linear-gradient(135deg, #007AFB 15%, #00477A 100%);
 }
 
   .shiny-sec {
-    background: linear-gradient(135deg, #F87171 15%, #FB923C 30%, #FACC15 45%, #4ADE80 60%, #38BDF8 75%, #C084FC 100%);
+    background: linear-gradient(135deg, #007AFB 15%, #FFFFFF 50%, #00477A 100%);
     background-size: 400% 100%;
     -webkit-background-clip: text;
     background-clip: text;

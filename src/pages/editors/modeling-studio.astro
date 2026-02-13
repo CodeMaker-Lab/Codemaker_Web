@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ModelingStudioLite from '../../components/editors/ModelingStudioLite.tsx';
+---
+
+<Layout title="Modeling Studio Lite | CodeMaker">
+    <ModelingStudioLite client:only="react" onExit={() => window.location.href = '/'} />
+</Layout>
+
+<style>
+    :global(body) {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+</style>

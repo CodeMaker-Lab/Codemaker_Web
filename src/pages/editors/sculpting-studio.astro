@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SculptingStudioLite from '../../components/editors/SculptingStudioLite';
+---
+
+<Layout title="Sculpting Studio Lite | CodeMaker">
+    <SculptingStudioLite client:only="react" onBack={() => window.location.href = '/'} />
+</Layout>
+
+<style>
+    :global(body) {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+</style>

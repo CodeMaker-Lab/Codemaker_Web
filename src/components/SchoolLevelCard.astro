@@ -1,0 +1,75 @@
+---
+interface Props {
+  level: 'junior' | 'senior' | 'master';
+}
+
+const { level } = Astro.props;
+
+const levelInfo = {
+  junior: {
+    title: "JUNIOR:",
+    years: "[3º - 6º de primaria]",
+    description: "Este nivel comprende cuatro cursos (CodeMaker 1-4) y está destinado a alumnos y alumnas desde 3º hasta 6º de primaria.",
+    contents: [
+      "Diseño objetos básicos en 3D y crear mundos interactivos.",
+      "Conceptos iniciales de programación informática, desarrollando aplicaciones y juegos.",
+      "Conocer los componentes y funcionamiento de un robot y aprender a programarlo para realizar tareas básicas."
+    ],
+    color: "border-[#22c55e]",
+    iconColor: "text-[#22c55e]"
+  },
+  senior: {
+    title: "SENIOR:",
+    years: "[1º ESO - 2º ESO]",
+    description: "Este nivel está enfocado en secundaria (1º y 2º de ESO), profundizando en lenguajes profesionales y robótica avanzada.",
+    contents: [
+      "Diseño de objetos 3D complejos y mundos interactivos programados para VR y AR.",
+      "Lenguajes de programación profesionales, creación de aplicaciones y juegos avanzados.",
+      "Programación avanzada de robots y primeros conceptos de electrónica y mecánica."
+    ],
+    color: "border-[#f97316]",
+    iconColor: "text-[#f97316]"
+  },
+  master: {
+    title: "MASTER:",
+    years: "[3º ESO - 2º Bach/FP]",
+    description: "Nivel avanzado para alumnos de secundaria superior y bachillerato, cubriendo IA, desarrollo web profesional y modelado 3D profesional.",
+    contents: [
+      "Diseño y modelado 3D profesional e introducción a la animación 3D.",
+      "Conceptos avanzados con lenguajes profesionales y desarrollo de videojuegos y aplicaciones completas.",
+      "Robótica avanzada y proyectos de conectividad e IOT.",
+      "Introducción a la Inteligencia Artificial y al uso de LLMs."
+    ],
+    color: "border-[#a855f7]",
+    iconColor: "text-[#a855f7]"
+  }
+};
+
+const info = levelInfo[level];
+---
+
+<div class={`bg-white rounded-3xl border-4 ${info.color} p-8 shadow-xl transition-transform hover:scale-[1.02] duration-300`}>
+  <div class="flex flex-col gap-4">
+    <div class="flex items-baseline gap-2">
+      <h3 class="text-2xl font-black text-slate-800 tracking-tight">{info.title}</h3>
+      <span class="text-slate-500 font-medium">{info.years}</span>
+    </div>
+    
+    <p class="text-slate-600 leading-relaxed font-bold">
+      {info.description}
+    </p>
+
+    <ul class="space-y-3 mt-2">
+      {info.contents.map(item => (
+        <li class="flex gap-3 text-slate-600 text-sm font-medium">
+          <svg class={`h-5 w-5 flex-none ${info.iconColor}`} viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          {item}
+        </li>
+      ))}
+    </ul>
+
+    </ul>
+  </div>
+</div>

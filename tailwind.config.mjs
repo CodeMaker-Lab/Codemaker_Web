@@ -3,6 +3,10 @@ export default {
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
   theme: {
     extend: {
+      colors: {
+        primary: '#007AFB',
+        secondary: '#00477A',
+      },
       keyframes: {
         scaleAnim: {
           '0%': { transform: 'scale(1)' },

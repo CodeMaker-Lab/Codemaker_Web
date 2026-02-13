@@ -1,0 +1,59 @@
+---
+import LetterEffect from "./LetterEffect.astro";
+
+interface Props {
+  schoolName: string;
+  curso: string;
+  color: string;
+}
+
+const { schoolName, curso, color } = Astro.props;
+---
+
+<section 
+  class="bg-[#007AFB] text-[--text-light] p-4 xl:pt-14" 
+  id="home" 
+>
+  <div class="max-w-5xl mx-auto space-y-8 py-16 md:py-10">
+    <div class="flex flex-col lg:flex-row items-center gap-8 p-4">
+      <!-- Text on the left -->
+      <div class="flex flex-col w-full lg:w-1/2 space-y-6 text-left">
+        <div class="mt-8">
+          <img 
+            src="/svg/Logo.svg" 
+            alt="CodeMaker Logo" 
+            class="h-24 md:h-24 w-auto object-contain"
+          />
+        </div>
+        
+        <div class="inline-flex items-center">
+          <span 
+            class="text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg"
+            style={`background-color: ${color};`}
+          >
+            {schoolName}
+          </span>
+        </div>
+
+        <p class="text-lg md:text-2xl text-[var(--white-icon)] leading-relaxed">
+          Innovador proyecto educativo para aprender las tecnologías del futuro-presente: 
+          <span class="font-bold">Programación, Diseño 3D, Robótica, Inteligencia Artificial y Desarrollo de Videojuegos.</span>
+        </p>
+      </div>
+
+      <!-- LetterEffect on the right -->
+      <div
+        class="flex justify-center w-full lg:w-1/2 md:h-[292px] size-[290px] pt-3 md:pt-9"
+      >
+        <LetterEffect />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .mask-fade-sides {
+    mask-image: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+  }
+</style>

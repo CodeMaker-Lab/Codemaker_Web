@@ -1,0 +1,257 @@
+---
+const tagStyles: Record<string, string> = {
+  "3D": "bg-slate-100 text-slate-600 border-slate-200",
+  "3d": "bg-purple-50 text-purple-600 border-purple-100",
+  "2d": "bg-sky-50 text-sky-600 border-sky-100",
+  "code": "bg-indigo-50 text-indigo-600 border-indigo-100",
+  "iniciación": "bg-emerald-50 text-emerald-700 border-emerald-100",
+  "avanzado": "bg-rose-50 text-rose-700 border-rose-100",
+};
+---
+
+<section id="apps" class="bg-white w-full py-20 px-10 border-t text-slate-900 patron-puntos">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-lg font-bold mb-2 shiny-sec-text-dev">CodeMaker_Dev</h2>
+    <h3 class="text-4xl md:text-5xl font-medium text-slate-900 mb-8">
+      Herramientas interactivas para el aprendizaje
+    </h3>
+    <h4 class="text-md md:text-lg text-left md:text-left">
+      En CodeMaker hemos desarrollado una completa suite de aplicaciones educativas para fomentar el aprendizaje de tecnologías como la
+      <span class="font-bold  text-purple-500">programación, desarrollo de videojuegos, modelado 3D y robótica</span>,
+      adaptadas a todos las edades y niveles educativos, inspiradas en aplicaciones profesionales como
+      <span class="font-bold text-fuchsia-500">Blender, Unity o VSCode</span>
+      con las que creamos una experiencia de aprendizaje interactiva y atractiva para los alumnos a la vez que adquieren capacidades fácilmente extrapolables a las herramientas más utilizadas en el mundo tecnológico actual.
+    </h4>
+    <br />
+    <div class="border-t border-slate-100 mt-2 mb-8"></div>
+    <h4 class="text-xl font-bold text-slate-900">
+    Apps incluidas en nuestra suite educativa:
+    </h4>
+    <br />
+      <!-- Tarjeta 1 
+      <div class="flex flex-col items-center text-center space-y-3">
+        <div
+          class="w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mb-2"
+        >
+          <div class="relative rounded-2xl p-[2px] shiny-sec-border-dev">
+            <div class="rounded-[0.9rem] overflow-hidden bg-slate-950">
+              <img
+                src="../images/web.png"
+                alt="Proyecto 1"
+                class="w-full h-32 md:h-48 object-cover"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-slate-950/60 pointer-events-none">
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="text-sm">
+          Páginas webs para centros educativos
+        </span>
+      </div> -->
+
+      <!-- Tarjeta 2 
+      <div class="flex flex-col items-center text-center space-y-3">
+        <div
+          class="w-full rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mb-2"
+        >
+          <div class="relative rounded-2xl p-[2px] shiny-sec-border-dev">
+            <div class="rounded-[0.9rem] overflow-hidden bg-slate-950">
+              <img
+                src="../images/gestion.png"
+                alt="Proyecto 1"
+                class="w-full h-32 md:h-48 object-cover"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-slate-950/60 pointer-events-none">
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="text-sm">
+          Plataformas educativas y de gestión
+        </span>
+      </div> -->
+
+    <!-- Cuadrícula de 6 imágenes -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[
+        { src: "../images/voxelstudio.png", alt: "Voxel Studio", title: "Voxel Studio", href: "/editors/voxel-studio", tags: ["3D", "iniciación"] },
+        { src: "../images/modelingstudio.png", alt: "Modeling Studio", title: "Modeling Studio", href: "/editors/modeling-studio", tags: ["3D", "intermedio"] },
+        { src: "../images/sculptstudio.png", alt: "Sculpting Studio", title: "Sculpting Studio", href: "/editors/sculpting-studio", tags: ["3D", "avanzado"] },
+        { src: "../images/game2dstudio.png", alt: "Game 2D Studio", title: "Game 2D Studio", comingSoon: true, tags: ["code", "2d", "iniciación"] },
+        { src: "../images/game3dstudio.png", alt: "Game 3D Studio", title: "Game 3D Studio", comingSoon: true, tags: ["code", "3d", "avanzado"] },
+        { src: "../images/roboticsstudio.png", alt: "Robotics Studio", title: "Robotics Studio", comingSoon: true, tags: ["code", "avanzado"] },
+      ].map((proyecto) => (
+        <div class="flex flex-col items-center text-center space-y-4 group">
+          <div class="w-full rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
+            <div class="relative rounded-2xl p-[2px] shiny-sec-border-dev">
+              <div class="rounded-[0.9rem] overflow-hidden bg-slate-950 aspect-video relative">
+                <img
+                  src={proyecto.src}
+                  alt={proyecto.alt}
+                  oncontextmenu="return false;"
+                  class={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${proyecto.comingSoon ? 'opacity-50 grayscale' : ''}`}
+                  loading="lazy"
+                />
+                {proyecto.comingSoon && (
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-white font-bold text-xs bg-slate-900/80 px-4 py-1.5 rounded-full uppercase tracking-widest border border-white/20">
+                      Próximamente
+                    </span>
+                  </div>
+                )}
+                <div class="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/10 transition-colors pointer-events-none">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex flex-col items-center gap-3">
+            <div class="space-y-1">
+              <h5 class="text-base font-bold text-slate-800 uppercase tracking-wide">
+                {proyecto.title}
+              </h5>
+              <div class="flex flex-wrap items-center justify-center gap-1.5">
+                {proyecto.tags.map(tag => {
+                  const style = tagStyles[tag] || "bg-gray-100 text-gray-600 border-gray-200";
+                  return (
+                    <span class={`text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border ${style}`}>
+                      {tag}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {proyecto.comingSoon ? (
+              <span class="text-[10px] uppercase font-bold px-5 py-2 rounded-xl border-2 border-slate-200 text-slate-400 cursor-default bg-slate-50/50">
+                Próximamente
+              </span>
+            ) : (
+              <a
+                href={proyecto.href}
+                class="text-[10px] uppercase font-bold px-6 py-2 rounded-xl border-2 border-[#007AFB] text-[#007AFB] hover:bg-[#007AFB] hover:text-white transition-all duration-300 active:scale-95 shadow-sm bg-white"
+              >
+                Probar Editor
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+
+
+    <!-- Texto y botón en 2 columnas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 items-start w-full py-12 gap-12 border-t border-slate-100 mt-12">
+      <!-- Columna Izquierda: Listado de herramientas -->
+      <div class="space-y-6">
+        <h4 class="text-xl font-bold text-slate-900">
+          Otras herramientas incluidas en la suite:
+        </h4>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-4">
+            <div class="mt-1 p-2 rounded-lg bg-blue-50 text-[#007AFB]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800">Gestión de aulas y alumnos</p>
+              <p class="text-sm text-slate-600">Organiza tus clases y monitoriza el acceso de tus alumnos de forma sencilla.</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-4">
+            <div class="mt-1 p-2 rounded-lg bg-green-50 text-green-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800">Evaluación continua y gamificación</p>
+              <p class="text-sm text-slate-600">Gamifica el aprendizaje y realiza un seguimiento automático del progreso.</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-4">
+            <div class="mt-1 p-2 rounded-lg bg-purple-50 text-purple-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800">Colaboración docente</p>
+              <p class="text-sm text-slate-600">Herramientas diseñadas para compartir recursos y experiencias entre profesores.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Columna Derecha: Contacto y Botón -->
+      <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col justify-center gap-6">
+        <h4 class="text-lg md:text-xl text-slate-700 leading-relaxed">
+          Contacta con nosotros para implementar estas herramientas de software en tu centro educativo y potenciar el aprendizaje de tus alumnos.
+        </h4>
+        <a
+          href="mailto:info@codemaker.es"
+          aria-label="Quiero estas apps en mi centro"
+          class="inline-flex justify-center items-center text-slate-50 px-8 py-4 rounded-2xl bg-[#007AFB] hover:bg-[#00477A] font-bold transition-all shadow-lg hover:shadow-blue-200 active:scale-95 text-lg"
+        >
+          Quiero estas apps en mi centro
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="ml-2 size-6"
+          >
+            <path
+              d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z"
+            ></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .shiny-sec-border-dev {
+    background: linear-gradient(135deg, #64748b 10%, #C084FC 90%);
+    background-size: 400%;
+    animation: shine-border-dev 6s linear infinite;
+  }
+
+  @keyframes shine-border-dev {
+    0% {
+      background-position: 100% 50%;
+    }
+    30%,
+    70% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .patron-puntos {
+    background-image: radial-gradient(rgba(0, 122, 251, 0.15) 0.5px, transparent 0.5px);
+    background-size: 10px 10px;
+  }
+
+  .shiny-sec-text-dev {
+    background: linear-gradient(135deg, #64748b 10%, #C084FC 90%);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine-text-dev 3s linear infinite;
+  }
+
+  @keyframes shine-text-dev {
+    0% {
+      background-position: 100% 50%;
+    }
+    30%,
+    70% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+</style>

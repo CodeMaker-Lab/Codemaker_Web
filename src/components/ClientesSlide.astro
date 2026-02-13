@@ -1,14 +1,10 @@
 ---
-const technologies = [
-  { name: "UJAEN", file: "ujaen" },
-  { name: "Junta de Andalucía", file: "junta" },
-  { name: "Ayto. de Jaén", file: "ayto-jaen" },
-  { name: "Maristas", file: "maristas" },
-  { name: "Divino Maestro", file: "divino-maestro" },
-  { name: "Vandelvira", file: "vandelvira" },
-  { name: "Veracruz", file: "veracruz" }
-];
+import { colegios } from "../data/colegios";
 
+const technologies = colegios.map(c => ({
+  name: c.nombre,
+  file: c.logo.split('/').pop().replace('.png', '')
+}));
 ---
 
 <div class="relative overflow-x-hidden mt-12 mb-2">

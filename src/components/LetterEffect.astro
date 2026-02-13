@@ -1,12 +1,12 @@
 ---
-const glitchColors = ["#5e4491", "#A476FF", "#241a38"];
+const glitchColors = ["#007AFB", "#00477A", "#FFFFFF"];
 const glitchSpeed = 33;
 const centerVignette = false;
 const outerVignette = false;
 const smooth = true;
-const highlightColor = "#ffffff";
+const highlightColor = "#FFFFFF";
 ---
-<div class="relative w-full h-full bg-slate-950 overflow-hidden">
+<div class="relative w-full h-full bg-[#007AFB] overflow-hidden">
   <canvas id="letter-glitch-canvas" class="block w-full h-full"></canvas>
 
   {outerVignette ? (
@@ -16,18 +16,18 @@ const highlightColor = "#ffffff";
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.8)_0%,_rgba(0,0,0,0)_60%)]"></div>
   ) : null}
 
-<div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[linear-gradient(to_right,_#020617_0%,_transparent_20%,_transparent_80%,_#020617_100%)]"></div>
+<div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[linear-gradient(to_right,rgba(0,122,251,0.5)_0%,_transparent_20%,_transparent_80%,rgba(0,122,251,0.5)_100%)]"></div>
 
   <script type="module" is:inline>
     const canvas = document.getElementById("letter-glitch-canvas");
     const context = canvas.getContext("2d");
-    const glitchColors = ["#1e293b", "#334155", "#94a3b8"] /*["#5e4491", "#A476FF", "#241a38"]*/;
+    const glitchColors = ["#007AFB", "#00477A", "#FFFFFF"];
     const glitchSpeed = 33;
     const smooth = true;
     const fontSize = 16;
     const charWidth = 10;
     const charHeight = 20;
-    const highlightColor = "#ffffff";
+    const highlightColor = "#FFFFFF";
     const words = ["Programacion", "Robotica", "3D", "IA"];
     const messageDuration = 5000;
 

@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import VoxelStudioLite from '../../components/editors/VoxelStudioLite.tsx';
+---
+
+<Layout title="Voxel Studio Lite | CodeMaker">
+    <VoxelStudioLite client:only="react" onExit={() => window.location.href = '/'} />
+</Layout>
+
+<style>
+    :global(body) {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+</style>
