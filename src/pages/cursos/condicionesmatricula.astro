@@ -1,0 +1,199 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Nav from "@/components/nav.astro";
+import Footer from "@/components/footer.astro";
+import LetterEffect from "@/components/LetterEffect.astro";
+import TecnologiasSlide from "@/components/TecnologiasSlide.astro";
+import { getGlobalConfig } from "@/lib/google-sheets";
+
+const config = await getGlobalConfig();
+---
+
+<Layout title="Condiciones de Matrícula | CodeMaker">
+  <Nav />
+  
+  <main class="bg-white overflow-x-hidden">
+    <!-- Header aligned with Home/Index -->
+    <section 
+      class="bg-[#007AFB] text-[--text-light] p-4 xl:pt-14" 
+      id="home" 
+    >
+      <div class="max-w-5xl mx-auto space-y-8 py-16 md:py-10">
+        <div class="flex flex-col lg:flex-row items-center gap-8 p-4">
+          <!-- Text on the left -->
+          <div class="flex flex-col w-full lg:w-1/2 space-y-4 text-left">
+            <div class="mt-8">
+              <img 
+                src="/svg/Logo.svg" 
+                alt="CodeMaker Logo" 
+                class="h-24 md:h-24 w-auto object-contain"
+              />
+            </div>
+            <p class="text-md md:text-2xl text-[var(--white-icon)]">
+              Proyecto de innovación educativa sobre programación, robótica, 3D e
+              inteligencia artificial durante el curso {config.curso_actual || '24/25'}.
+            </p>
+          </div>
+
+          <!-- LetterEffect on the right -->
+          <div
+            class="flex justify-center w-full lg:w-1/2 md:h-[292px] size-[290px] pt-3 md:pt-9"
+          >
+            <LetterEffect />
+          </div>
+        </div>
+        
+        <div class="pt-0">
+          <TecnologiasSlide />
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-24 px-6 space-y-24 relative">
+      <div class="absolute inset-0 opacity-[0.03] patron-puntos pointer-events-none"></div>
+      
+      <!-- Intro -->
+      <div class="space-y-4 relative z-10 text-center">
+        <h1 class="text-4xl md:text-5xl font-medium text-slate-900 tracking-tight mb-8">
+          Condiciones de Matrícula
+        </h1>
+        <p class="text-xl text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+          En esta página te explicamos las condiciones de la actividad extraescolar ‘CodeMaker’ que se imparte en diferentes centros educativos de Jaén.
+        </p>
+      </div>
+
+      <div class="h-px bg-slate-100 w-full relative z-10"></div>
+
+      <!-- Sections -->
+      <div class="space-y-24 relative z-10">
+        
+        <!-- 1. Calendario -->
+        <section class="space-y-10">
+          <div class="flex items-center gap-5">
+            <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">📅</div>
+            <h2 class="text-3xl md:text-4xl font-medium text-slate-900 tracking-tight">1. Calendario y recuperación de clases</h2>
+          </div>
+          <div class="space-y-6 text-slate-600 leading-relaxed text-lg">
+            <p>
+              La actividad CodeMaker comienza a principios de octubre, y finaliza la última semana del mes de mayo. La actividad se rige por el calendario escolar, por lo que habrá clase de la extraescolar siempre que haya clase en el colegio/instituto, y no habrá extraescolar cuando no haya colegio/instituto. Si algún día puntual no se fuese a cumplir dicha norma por algún motivo extraordinario, el docente avisaría a todos los padres/madres/tutores previamente.
+            </p>
+            
+            <div class="bg-blue-50/50 p-8 rounded-2xl border border-blue-100 space-y-4">
+              <h3 class="font-bold text-[#00477A] text-xl">Pago de las mensualidades:</h3>
+              <p>
+                Todos los meses se abonará la misma cantidad (el precio establecido), independientemente del número de clases que haya. Si hay grupos que dan muy pocas clases por caer muchos festivos, se compensará a final de curso, tal y como se indica a continuación.
+              </p>
+            </div>
+
+            <div class="space-y-4 pt-4">
+              <h3 class="font-bold text-slate-800 text-xl">Normativa de recuperación de clases:</h3>
+              <ul class="space-y-4">
+                <li class="flex gap-4">
+                  <span class="text-[#007AFB] font-bold text-xl">•</span>
+                  <span>Si se pierde clase un día lectivo (ausencia o enfermedad del monitor/a, problemas con las instalaciones del centro, etc.), dicha clase se recuperará íntegra en un día y hora a escoger entre el monitor/a y la mayoría de los/las alumnos/as, sin ningún coste.</span>
+                </li>
+                <li class="flex gap-4">
+                  <span class="text-[#007AFB] font-bold text-xl">•</span>
+                  <span>Si se pierde clase por ser un día no lectivo (puentes, navidad, semana santa, etc.), dicha clase no se recuperará.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="bg-amber-50/50 p-8 rounded-2xl border border-amber-100 space-y-4 mt-8">
+              <h3 class="font-bold text-amber-800 text-xl flex items-center gap-3">
+                <span class="text-2xl">✨</span> Compromiso de recuperaciones a final de curso
+              </h3>
+              <p>
+                No obstante, los docentes de CodeMaker se comprometan a tratar de equiparar las sesiones de todos los grupos, compensando a aquellos que les han coincidido más festivos a final de curso. Estas recuperaciones se establecen de la siguiente forma: si un grupo no ha llegado a dar un mínimo de 30 sesiones, se recuperarán sesiones en junio sin coste añadido, hasta un máximo de 2 sesiones.
+              </p>
+              <div class="pt-4 border-t border-amber-200/50 mt-4">
+                <p class="font-bold text-amber-900 leading-relaxed text-pretty">
+                  Es decir, todos los grupos se regirán por el calendario escolar y se pagará todos los meses la cuota íntegra. Los grupos perjudicados por tener menos clases, se compensarán a final de curso.
+                </p>
+              </div>
+            </div>
+
+            <div class="pt-6">
+              <a 
+                href={config.link_calendario_escolar || 'https://www.juntadeandalucia.es/educacion/portals/web/inspeccion/calendario-escolar'} 
+                target="_blank" 
+                class="inline-flex items-center gap-3 bg-white border border-slate-200 px-8 py-4 rounded-2xl text-[#00477A] font-bold hover:border-[#007AFB] hover:bg-blue-50/50 transition-all shadow-sm active:scale-95"
+              >
+                🔗 Calendario escolar {config.curso_actual || '25/26'}
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <div class="h-px bg-slate-100 w-full"></div>
+
+        <!-- 2. Pago -->
+        <section class="space-y-10">
+          <div class="flex items-center gap-5">
+            <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">💳</div>
+            <h2 class="text-3xl md:text-4xl font-medium text-slate-900 tracking-tight">2. Pago de la mensualidad</h2>
+          </div>
+          <div class="space-y-6 text-slate-600 leading-relaxed text-lg">
+            <p>
+              Dado que cada docente gestiona e imparte de forma independiente sus grupos de la actividad CodeMakers, la cuota se le deberá abonar al propio docente a través de los medios de pago de los que este disponga (habitualmente, en efectivo, bizum o transferencia bancaria).
+            </p>
+            <div class="inline-flex items-center gap-4 bg-green-50 px-8 py-5 rounded-2xl border border-green-100">
+              <span class="text-green-600 text-2xl">📢</span>
+              <p class="font-bold text-green-900 text-pretty">
+                Se deberá abonar la mensualidad siempre en la primera semana del mes.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div class="h-px bg-slate-100 w-full"></div>
+
+        <!-- 3. Datos y Derechos -->
+        <section class="space-y-10">
+          <div class="flex items-center gap-5">
+            <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">🛡️</div>
+            <h2 class="text-3xl md:text-4xl font-medium text-slate-900 tracking-tight">3. Protección de datos e imagen</h2>
+          </div>
+          
+          <div class="grid lg:grid-cols-2 gap-8 pt-4">
+            <div class="bg-white p-10 rounded-2xl border border-slate-200 space-y-6 shadow-sm hover:shadow-md transition-all group">
+              <h3 class="font-bold text-[#00477A] text-xl tracking-tight group-hover:text-[#007AFB] transition-colors">Protección de datos</h3>
+              <p class="text-slate-600 leading-relaxed text-sm font-medium">
+                El alumno o su representante legal consiente y autoriza, al matricularse en la actividad Makers, a los docentes que imparten la actividad, a incluir los datos personales contenidos en el formulario de matrícula en el fichero del que es titular el propio docente así como Daniel Pérez, gestor de la plataforma, para su tratamiento automatizado con el objeto de utilizarlos para cuantas cuestiones deriven directa o indirectamente de la formación en la que ha sido matriculado, así como medio informativo sobre otros cursos o servicios, siempre en cumplimiento de lo dispuesto en la Ley Orgánica 15/1999 de 13 de diciembre de Protección de datos personales.
+              </p>
+            </div>
+            
+            <div class="bg-white p-10 rounded-2xl border border-slate-200 space-y-6 shadow-sm hover:shadow-md transition-all group">
+              <h3 class="font-bold text-[#00477A] text-xl tracking-tight group-hover:text-[#007AFB] transition-colors">Derechos de imagen</h3>
+              <p class="text-slate-600 leading-relaxed text-sm font-medium">
+                Los docentes de CodeMaker se comprometan a no publicar fotografías en las que aparezcan directamente los alumnos y alumnas inscritos, tan solo se publicarán fotografías de grupo en las que no se vean las caras de los alumnos y alumnas. El derecho a la propia imagen está reconocido al artículo 18. de la Constitución y regulado por la Ley 1/1982, de 5 de mayo, sobre el derecho al honor, a la intimidad personal y familiar y a la propia imagen y la Ley 15/1999, de 13 de diciembre, sobre la Protección de Datos de Carácter Personal.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+      
+      <!-- Back to schools button -->
+      <div class="pt-8 text-center pb-8 border-t border-slate-100">
+        <a 
+          href="/" 
+          class="inline-flex items-center gap-3 bg-slate-900 text-white px-10 py-5 rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-[#007AFB] transition-all shadow-xl active:scale-95"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          Volver al inicio
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style is:global>
+  .patron-puntos {
+    background-image: radial-gradient(rgba(0, 71, 122, 0.05) 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+  }
+</style>

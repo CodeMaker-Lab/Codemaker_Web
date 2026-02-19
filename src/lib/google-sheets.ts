@@ -4,45 +4,92 @@ export interface SchoolGroup {
     precio: string;
 }
 
+export interface Docente {
+    nombre: string;
+    contacto: string;
+    whatsapp: string;
+    grupos: string;
+}
+
 export interface SchoolData {
     id: string;
     nombre: string;
+    direccion?: string;
+    logo?: string;
     curso: string;
     color: string;
     niveles: string[];
     grupos: SchoolGroup[];
     info_general: string;
-    info_docente: string;
-    info_contacto: string;
-    whatsapp_num?: string;
-    link_inscripcion: string;
+    docentes: Docente[];
     status: 'live' | 'past';
+    link_inscripcion: string;
 }
 
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMkRkozxJVhDKKWY8Bxvb7R1hH-6HtLKyXt69Jpk51ivWLHBjw4yOUeRUdC2PSB80tUBTtIyEKG2vY/pub?gid=0&single=true&output=csv';
+export interface GlobalConfig {
+    link_calendario_escolar: string;
+    curso_actual: string;
+    link_app: string;
+    [key: string]: string;
+}
+
+const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMkRkozxJVhDKKWY8Bxvb7R1hH-6HtLKyXt69Jpk51ivWLHBjw4yOUeRUdC2PSB80tUBTtIyEKG2vY/pub?single=true&output=csv';
+const SCHOOLS_URL = `${BASE_URL}&gid=0`;
+const CONFIG_URL = `${BASE_URL}&gid=1667533384`;
+
+export async function getGlobalConfig(): Promise<GlobalConfig> {
+    try {
+        const response = await fetch(`${CONFIG_URL}&cb=${Date.now()}`);
+        if (!response.ok) throw new Error('Failed to fetch config data');
+        const csvText = await response.text();
+        const rows = parseCSV(csvText);
+
+        const config: GlobalConfig = {
+            link_calendario_escolar: '',
+            curso_actual: '24/25',
+            link_app: '/login'
+        };
+
+        // Skip header row [key, value]
+        rows.slice(1).forEach(row => {
+            if (row[0] && row[1]) {
+                config[row[0].trim()] = row[1].trim();
+            }
+        });
+
+        return config;
+    } catch (error) {
+        console.error('Error fetching config:', error);
+        return {
+            link_calendario_escolar: 'https://www.juntadeandalucia.es/educacion/portals/web/inspeccion/calendario-escolar',
+            curso_actual: '24/25',
+            link_app: '/login'
+        };
+    }
+}
 
 export async function getSchools(): Promise<SchoolData[]> {
     try {
-        const response = await fetch(`${SHEET_URL}&cb=${Date.now()}`);
-        if (!response.ok) throw new Error('Failed to fetch sheet data');
+        const response = await fetch(`${SCHOOLS_URL}&cb=${Date.now()}`);
+        if (!response.ok) throw new Error('Failed to fetch school data');
         const csvText = await response.text();
 
-        // Simple CSV parser that handles quotes for "niveles"
-        const rows = csvText.split(/\r?\n/).filter(row => row.trim() !== '');
-        const headers = parseCSVRow(rows[0]);
-        const dataRows = rows.slice(1);
+        const allRows = parseCSV(csvText);
+        if (allRows.length === 0) return [];
 
-        return dataRows.map(row => {
-            const values = parseCSVRow(row);
+        const headers = allRows[0];
+        const dataRows = allRows.slice(1);
+
+        return dataRows.map(rowValues => {
             const school: any = {};
 
             headers.forEach((header, index) => {
-                school[header] = values[index];
+                school[header] = rowValues[index];
             });
 
             // Process niveles (junior, senior -> ["junior", "senior"])
             const nivelesRaw = school.niveles || '';
-            const niveles = nivelesRaw.split(',').map((n: string) => n.trim().toLowerCase()).filter((n: string) => n !== '');
+            const niveles = nivelesRaw.split(',').map((n: string) => n.trim().charAt(0).toUpperCase() + n.trim().slice(1).toLowerCase()).filter((n: string) => n !== '');
 
             // Process groups
             const grupos: SchoolGroup[] = [];
@@ -59,26 +106,51 @@ export async function getSchools(): Promise<SchoolData[]> {
                 }
             }
 
-            // Find whatsapp field case-insensitively and stripping common separators
-            const whatsappKey = Object.keys(school).find(k => {
-                const cleanKey = k.toLowerCase().replace(/[\s\._\-]/g, '');
-                return cleanKey === 'whatsapp' || cleanKey === 'whatsappnum';
-            });
-            const whatsappVal = whatsappKey ? school[whatsappKey] : '';
+            // Process Docentes (multiple support)
+            const docentes: Docente[] = [];
+
+            // Try to find up to 3 teachers from the new columns
+            for (let i = 1; i <= 3; i++) {
+                const nombre = school[`docente${i}_nombre`];
+                const contacto = school[`docente${i}_contacto`];
+                const whatsappRaw = school[`docente${i}_whatsapp`];
+                const gruposTarget = school[`docente${i}_grupos`];
+
+                if (nombre) {
+                    docentes.push({
+                        nombre: nombre.trim(),
+                        contacto: (contacto || '').trim(),
+                        whatsapp: (whatsappRaw || '').toString().trim().replace(/\s+/g, ''),
+                        grupos: (gruposTarget || '').trim()
+                    });
+                }
+            }
+
+            // Fallback for single teacher (backward compatibility)
+            if (docentes.length === 0 && school.info_docente) {
+                docentes.push({
+                    nombre: school.info_docente,
+                    contacto: school.info_contacto || '',
+                    whatsapp: (school.whatsapp_num || '').toString().trim().replace(/\s+/g, ''),
+                    grupos: ''
+                });
+            }
+
+            const normalizedId = (school.id || '').toLowerCase().replace(/[\s\._\-]/g, '');
 
             return {
-                id: school.id,
+                id: normalizedId,
                 nombre: school.nombre,
+                direccion: school.direccion,
+                logo: school.logo,
                 curso: school.curso || '24/25',
                 color: school.color ? (school.color.startsWith('#') ? school.color : `#${school.color}`) : '#22c55e',
                 niveles,
                 grupos,
                 info_general: school.info_general,
-                info_docente: school.info_docente,
-                info_contacto: school.info_contacto,
-                whatsapp_num: (whatsappVal || '').toString().trim().replace(/\s+/g, ''),
-                link_inscripcion: school.link_inscripcion,
-                status: school.status as 'live' | 'past'
+                docentes,
+                status: school.status as 'live' | 'past',
+                link_inscripcion: school.link_inscripcion
             };
         });
     } catch (error) {
@@ -87,22 +159,46 @@ export async function getSchools(): Promise<SchoolData[]> {
     }
 }
 
-function parseCSVRow(row: string): string[] {
-    const result = [];
-    let current = '';
+function parseCSV(text: string): string[][] {
+    const result: string[][] = [];
+    let currentRow: string[] = [];
+    let currentField = '';
     let inQuotes = false;
 
-    for (let i = 0; i < row.length; i++) {
-        const char = row[i];
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
         if (char === '"') {
-            inQuotes = !inQuotes;
+            if (inQuotes && nextChar === '"') {
+                // Escaped quote
+                currentField += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
         } else if (char === ',' && !inQuotes) {
-            result.push(current.trim());
-            current = '';
+            currentRow.push(currentField.trim());
+            currentField = '';
+        } else if ((char === '\r' || char === '\n') && !inQuotes) {
+            if (currentField !== '' || currentRow.length > 0) {
+                currentRow.push(currentField.trim());
+                result.push(currentRow);
+                currentField = '';
+                currentRow = [];
+            }
+            if (char === '\r' && nextChar === '\n') {
+                i++;
+            }
         } else {
-            current += char;
+            currentField += char;
         }
     }
-    result.push(current.trim());
+
+    if (currentField !== '' || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        result.push(currentRow);
+    }
+
     return result;
 }

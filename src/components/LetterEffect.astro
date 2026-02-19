@@ -1,20 +1,10 @@
 ---
-const glitchColors = ["#007AFB", "#00477A", "#FFFFFF"];
-const glitchSpeed = 33;
-const centerVignette = false;
-const outerVignette = false;
-const smooth = true;
-const highlightColor = "#FFFFFF";
+
 ---
 <div class="relative w-full h-full bg-[#007AFB] overflow-hidden">
   <canvas id="letter-glitch-canvas" class="block w-full h-full"></canvas>
 
-  {outerVignette ? (
-    <div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(16,16,16,0)_60%,_rgba(16,16,16,1)_100%)]"></div>
-  ) : null}
-  {centerVignette ? (
-    <div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.8)_0%,_rgba(0,0,0,0)_60%)]"></div>
-  ) : null}
+
 
 <div class="absolute top-0 left-0 w-full h-full pointer-events-none bg-[linear-gradient(to_right,rgba(0,122,251,0.5)_0%,_transparent_20%,_transparent_80%,rgba(0,122,251,0.5)_100%)]"></div>
 

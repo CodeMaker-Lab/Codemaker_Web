@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    ArrowLeft, Save, Brush, Eraser, Activity, MousePointer2,
+    Save, Brush, Eraser,
     Palette, Move, Square, Hammer, MinusCircle, Divide,
     FlipHorizontal, RefreshCw, GraduationCap, ChevronRight,
-    ChevronLeft, X, Home, HelpCircle, LogOut, CheckCircle2, AlertCircle, Trash2
+    ChevronLeft, X, Home, HelpCircle, LogOut, CheckCircle2, AlertCircle, Trash2, Crown,
+    Users, Rocket, Cloud
 } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -81,12 +82,12 @@ const LiteNotification: React.FC<{ message: string; type: 'success' | 'warning' 
 
 // --- COMPONENTE PRINCIPAL ---
 
-const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = ({ onBack }) => {
+const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [brushType, setBrushType] = useState<BrushType>('brush');
     const [brushSize, setBrushSize] = useState(0.5);
     const [brushIntensity, setBrushIntensity] = useState(0.5);
-    const [brushColor, setBrushColor] = useState('#ff0000');
+    const [brushColor] = useState('#ff0000');
     const [symmetryEnabled, setSymmetryEnabled] = useState(true);
     const [negativeMode, setNegativeMode] = useState(false);
 
@@ -95,13 +96,18 @@ const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = ({ onBack }) => 
     const [tutorialStep, setTutorialStep] = useState(0);
     const [showHelp, setShowHelp] = useState(false);
     const [projectName, setProjectName] = useState("Escultura Lite");
+    const [isPremiumOpen, setIsPremiumOpen] = useState(false);
 
     const showAlert = (message: string, type: 'success' | 'warning' | 'error' = 'warning') => {
         setNotification({ message, type });
     };
 
     const handleLiteMessage = (customMsg?: string) => {
-        showAlert(customMsg || "Esta función está desactivada en la versión Lite.");
+        showAlert(customMsg || "Esta función está desactivada en la versión Demo.");
+    };
+
+    const handleExit = () => {
+        window.location.href = '/';
     };
 
     const engineRef = useRef<{
@@ -339,13 +345,16 @@ const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = ({ onBack }) => 
                 border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex',
                 alignItems: 'center', padding: '0 16px', gap: '16px', zIndex: 100
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: 'auto', cursor: 'pointer' }} onClick={onBack}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: 'auto', cursor: 'pointer' }} onClick={handleExit}>
                     <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: 'rgba(192,64,0,0.2)', border: '1px solid rgba(192,64,0,0.3)', display: 'flex' }}>
                         <Hammer size={20} color="#ff9f43" />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#d1d5db' }}>Codemaker 3D</span>
-                        <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#ff9f43', textTransform: 'uppercase' }}>Esculpido Lite</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'white' }}>Codemaker</span>
+                            <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#000', backgroundColor: '#ff9f43', padding: '1px 5px', borderRadius: '4px' }}>DEMO</span>
+                        </div>
+                        <span style={{ fontSize: '10px', color: '#9ca3af', letterSpacing: '0.5px' }}>Sculpting Studio</span>
                     </div>
                 </div>
 
@@ -361,8 +370,9 @@ const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = ({ onBack }) => 
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
-                    <button onClick={() => setShowHelp(true)} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }}><HelpCircle size={20} /></button>
-                    <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }}><LogOut size={20} /></button>
+                    <button onClick={() => setIsPremiumOpen(true)} style={{ background: 'none', border: 'none', color: '#fbbf24', padding: '8px', cursor: 'pointer' }} title="Premium"><Crown size={20} /></button>
+                    <button onClick={() => setShowHelp(true)} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }} title="Ayuda"><HelpCircle size={20} /></button>
+                    <button onClick={handleExit} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }} title="Salir"><LogOut size={20} /></button>
                 </div>
             </header>
 
@@ -371,8 +381,12 @@ const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = ({ onBack }) => 
 
                 {/* Home & Reset Panel */}
                 <div style={{ position: 'absolute', top: '88px', left: '16px', zIndex: 10, width: '256px', backgroundColor: 'rgba(17,17,17,0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '8px', display: 'flex', gap: '8px' }}>
-                    <button onClick={handleHome} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', border: 'none', color: '#9ca3af', borderRadius: '8px', padding: '8px', cursor: 'pointer' }} title="Vista Inicio"><Home size={20} /></button>
-                    <button onClick={resetSphere} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', border: 'none', color: '#f87171', borderRadius: '8px', padding: '8px', cursor: 'pointer' }} title="Reiniciar Escena"><Trash2 size={20} /></button>
+                    <button onClick={handleHome} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', border: 'none', color: '#9ca3af', borderRadius: '8px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} title="Vista Inicio">
+                        <Home size={16} /> <span style={{ fontSize: '12px', fontWeight: 500 }}>Inicio</span>
+                    </button>
+                    <button onClick={resetSphere} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', border: 'none', color: '#f87171', borderRadius: '8px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} title="Reiniciar Escena">
+                        <Trash2 size={16} /> <span style={{ fontSize: '12px', fontWeight: 500 }}>Reiniciar</span>
+                    </button>
                 </div>
 
                 {/* Tools Panel */}
@@ -390,26 +404,33 @@ const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = ({ onBack }) => 
                                 { id: 'crease', label: 'Pliegue', icon: Divide },
                                 { id: 'drag', label: 'Arrastrar', icon: Move },
                                 { id: 'paint', label: 'Pintar', icon: Palette },
-                            ].map((tool) => (
-                                <button
-                                    key={tool.id}
-                                    onClick={() => {
-                                        if (tool.id !== 'brush') {
-                                            handleLiteMessage("Esta herramienta solo está disponible en la versión completa.");
-                                            return;
-                                        }
-                                        setBrushType(tool.id as BrushType);
-                                    }}
-                                    style={{
-                                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px', borderRadius: '8px', transition: '0.2s', border: 'none', cursor: tool.id === 'brush' ? 'pointer' : 'not-allowed',
-                                        backgroundColor: brushType === tool.id ? '#007AFB' : 'rgba(255,255,255,0.05)',
-                                        color: brushType === tool.id ? 'white' : '#9ca3af'
-                                    }}
-                                >
-                                    <tool.icon size={20} />
-                                    <span style={{ fontSize: '10px', marginTop: '4px' }}>{tool.label}</span>
-                                </button>
-                            ))}
+                            ].map((tool) => {
+                                const isEnabled = tool.id === 'brush';
+                                return (
+                                    <button
+                                        key={tool.id}
+                                        onClick={() => {
+                                            if (!isEnabled) {
+                                                handleLiteMessage("Esta herramienta solo está disponible en la versión completa.");
+                                                return;
+                                            }
+                                            setBrushType(tool.id as BrushType);
+                                        }}
+                                        style={{
+                                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px', borderRadius: '8px', transition: '0.2s', border: 'none',
+                                            cursor: isEnabled ? 'pointer' : 'not-allowed',
+                                            backgroundColor: brushType === tool.id ? '#007AFB' : 'rgba(255,255,255,0.05)',
+                                            color: brushType === tool.id ? 'white' : (isEnabled ? '#9ca3af' : '#555'),
+                                            opacity: isEnabled ? 1 : 0.5,
+                                            filter: isEnabled ? 'none' : 'grayscale(1)'
+                                        }}
+                                        title={isEnabled ? tool.label : "Solo disponible en Premium"}
+                                    >
+                                        <tool.icon size={20} />
+                                        <span style={{ fontSize: '10px', marginTop: '4px' }}>{tool.label}</span>
+                                    </button>
+                                )
+                            })}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -510,6 +531,48 @@ const SculptingStudioLite: React.FC<SculptingStudioLiteProps> = ({ onBack }) => 
                     </div>
                 )}
             </div>
+
+            {/* Premium Modal */}
+            {isPremiumOpen && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }} onClick={() => setIsPremiumOpen(false)}>
+                    <div style={{ backgroundColor: '#111', borderRadius: '24px', padding: '32px', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', width: '90%', maxWidth: '440px' }} onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setIsPremiumOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
+                            <X size={24} />
+                        </button>
+
+                        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                            <div style={{ display: 'inline-flex', padding: '12px', borderRadius: '20px', backgroundColor: 'rgba(251, 191, 36, 0.1)', marginBottom: '16px' }}>
+                                <Crown size={32} style={{ color: '#fbbf24' }} />
+                            </div>
+                            <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: 'white' }}>Funciones Premium</h2>
+                            <p style={{ color: '#9ca3af', fontSize: '14px', marginTop: '8px' }}>Desbloquea todo el potencial de Codemaker para tu centro</p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                            {[
+                                { icon: <Users size={16} />, text: "Crear clases y gestionar alumnos" },
+                                { icon: <Rocket size={16} />, text: "Gamificación y evaluación" },
+                                { icon: <Cloud size={16} />, text: "Guardar en la nube" },
+                                { icon: <Brush size={16} />, text: "Pinceles avanzados (Suavizar, Aplanar, etc.)" },
+                                { icon: <Palette size={16} />, text: "Pincel de colorear y texturas" },
+                            ].map((item, i) => (
+                                <div key={i} style={{
+                                    display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
+                                    backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px',
+                                    border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left'
+                                }}>
+                                    <div style={{ color: '#60a5fa', minWidth: '24px', display: 'flex', justifyContent: 'center' }}>{item.icon}</div>
+                                    <span style={{ fontSize: '13px', color: '#d1d5db', lineHeight: '1.4' }}>{item.text}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button onClick={() => setIsPremiumOpen(false)} style={{ width: '100%', marginTop: '24px', padding: '14px', background: '#fbbf24', color: 'black', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'filter 0.2s', fontSize: '14px' }} onMouseEnter={(e) => e.currentTarget.style.filter = 'brightness(1.1)'} onMouseLeave={(e) => e.currentTarget.style.filter = 'none'}>
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Notification */}
             {notification && (

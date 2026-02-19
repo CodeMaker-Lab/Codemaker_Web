@@ -1,0 +1,148 @@
+---
+const faqs = [
+  {
+    question: "Soy un alumno/a interesado/a en aprender nuevas tecnologías como el 3D y la programación, ¿qué puedo hacer?",
+    answer: "Puedes buscar un centro educativo donde se impartan nuestros cursos o apuntarte a nuestros grupos online."
+  },
+  {
+    question: "Si me matriculo en vuestros cursos, ¿cómo accedo a vuestras apps?",
+    answer: "Una vez matriculado, tu profesor/a te dará acceso a todas las apps que vayáis necesitando durante el curso."
+  },
+  {
+    question: "Soy un profesor/a de un centro educativo, ¿qué hago para poder usar vuestras apps?",
+    answer: "Tienes dos opciones, o contratar nuestros servicios educativos y que un docente vaya a impartir un curso, o contratar una licencia de uso de las apps para que los propios profes del centro puedan usar las distintas apps en asignaturas tecnológicas, programas extracurriculares, etc."
+  },
+  {
+    question: "¿Para qué sirven vuestras apps?",
+    answer: "Antes de desarrollar nuestras apps, los miembros de nuestro equipo han sido docentes de diferentes áreas tecnológicas en todos los niveles educativos, utilizando conocidas herramientas como Scratch o Tinkercad en niveles introductorios, hasta Blender, Unity o VSCode en niveles avanzados. Tras años de experiencia, hemos desarrollado nuestra suite propia de herramientas interactivas (Voxel Studio, Modeling Studio, Sculpting Studio, etc.) inspiradas en estándares de la industria pero adaptadas pedagógicamente para facilitar el aprendizaje."
+  }
+];
+---
+
+<section id="faqs" class="py-24 bg-white border-t border-slate-100 relative overflow-hidden patron-puntos">
+  <!-- Fondo decorativo -->
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-100 blur-[120px] rounded-full"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-100 blur-[120px] rounded-full"></div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-6 relative z-10">
+    <div class="text-center mb-16">
+      <h3 class="text-4xl md:text-5xl font-medium text-slate-900">
+        Preguntas Frecuentes y contacto
+      </h3>
+      <p class="mt-4 text-slate-600 text-lg">
+        Resolvemos tus dudas sobre nuestras apps y nuestros cursos.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      {faqs.map((faq) => (
+        <div class="faq-item group">
+          <button
+            class="faq-trigger w-full text-left p-6 sm:p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 flex items-center justify-between gap-4"
+            aria-expanded="false"
+          >
+            <span class="text-lg font-bold text-slate-800 leading-tight group-hover:text-[#007AFB] transition-colors">
+              {faq.question}
+            </span>
+            <div class="faq-icon-container flex-shrink-0 w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-[#007AFB] transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </button>
+          <div class="faq-content overflow-hidden transition-all duration-300 max-h-0 opacity-0">
+            <div class="p-6 sm:p-8 pt-0 text-slate-600 leading-relaxed text-lg text-pretty">
+              {faq.answer}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Contacto adicional -->
+    <div class="mt-16 bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div class="text-center md:text-left">
+        <h4 class="text-xl font-bold text-slate-900 mb-2">Contacta con nosotros</h4>
+        <p class="text-slate-600">Ponte en contacto con nosotros para revolver cualquier duda o contratar nuestros cursos o aplicaciones.</p>
+      </div>
+      <div class="flex flex-col gap-3 w-full md:w-auto">
+        <button
+          class="contact-trigger flex items-center justify-center gap-3 text-white px-8 py-4 rounded-2xl bg-[#007AFB] hover:bg-[#00477A] font-bold transition-all shadow-lg hover:shadow-blue-200 active:scale-95 text-lg"
+        >
+          Contacta con nosotros
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const faqItems = document.querySelectorAll('.faq-item');
+
+  faqItems.forEach(item => {
+    const trigger = item.querySelector('.faq-trigger');
+    const content = item.querySelector('.faq-content') as HTMLElement;
+    const icon = item.querySelector('svg');
+
+    trigger?.addEventListener('click', () => {
+      const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+
+      // Close all other items
+      faqItems.forEach(otherItem => {
+        if (otherItem !== item) {
+          const otherTrigger = otherItem.querySelector('.faq-trigger');
+          const otherContent = otherItem.querySelector('.faq-content') as HTMLElement;
+          const otherIcon = otherItem.querySelector('svg');
+          
+          otherTrigger?.setAttribute('aria-expanded', 'false');
+          otherContent.style.maxHeight = '0px';
+          otherContent.style.opacity = '0';
+          otherIcon?.classList.remove('rotate-180');
+        }
+      });
+
+      // Toggle current item
+      trigger.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+      if (!isOpen) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.style.opacity = '1';
+        icon?.classList.add('rotate-180');
+      } else {
+        content.style.maxHeight = '0px';
+        content.style.opacity = '0';
+        icon?.classList.remove('rotate-180');
+      }
+    });
+  });
+</script>
+
+<style>
+  .shiny-sec-text-dev {
+    background: linear-gradient(135deg, #64748b 10%, #C084FC 90%);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine-text-dev 3s linear infinite;
+  }
+
+  @keyframes shine-text-dev {
+    0% { background-position: 100% 50%; }
+    30%, 70% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  .faq-content {
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+
+  .patron-puntos {
+    background-image: radial-gradient(rgba(0, 122, 251, 0.15) 0.5px, transparent 0.5px);
+    background-size: 10px 10px;
+  }
+</style>

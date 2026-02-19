@@ -77,12 +77,54 @@ const tagStyles: Record<string, string> = {
     <!-- Cuadrícula de 6 imágenes -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {[
-        { src: "../images/voxelstudio.png", alt: "Voxel Studio", title: "Voxel Studio", href: "/editors/voxel-studio", tags: ["3D", "iniciación"] },
-        { src: "../images/modelingstudio.png", alt: "Modeling Studio", title: "Modeling Studio", href: "/editors/modeling-studio", tags: ["3D", "intermedio"] },
-        { src: "../images/sculptstudio.png", alt: "Sculpting Studio", title: "Sculpting Studio", href: "/editors/sculpting-studio", tags: ["3D", "avanzado"] },
-        { src: "../images/game2dstudio.png", alt: "Game 2D Studio", title: "Game 2D Studio", comingSoon: true, tags: ["code", "2d", "iniciación"] },
-        { src: "../images/game3dstudio.png", alt: "Game 3D Studio", title: "Game 3D Studio", comingSoon: true, tags: ["code", "3d", "avanzado"] },
-        { src: "../images/roboticsstudio.png", alt: "Robotics Studio", title: "Robotics Studio", comingSoon: true, tags: ["code", "avanzado"] },
+        { 
+          src: "../images/voxelstudio.png", 
+          alt: "Voxel Studio", 
+          title: "Voxel Studio", 
+          href: "/editors/voxel-studio", 
+          tags: ["3D", "iniciación"],
+          description: "Crea mundos increíbles bloque a bloque. Una herramienta sencilla y potente para iniciarse en el diseño 3D."
+        },
+        { 
+          src: "../images/modelingstudio.png", 
+          alt: "Modeling Studio", 
+          title: "Modeling Studio", 
+          href: "/editors/modeling-studio", 
+          tags: ["3D", "intermedio"],
+          description: "Domina el modelado poligonal avanzado. Diseña objetos complejos con precisión profesional."
+        },
+        { 
+          src: "../images/sculptstudio.png", 
+          alt: "Sculpting Studio", 
+          title: "Sculpting Studio", 
+          href: "/editors/sculpting-studio", 
+          tags: ["3D", "avanzado"],
+          description: "Esculpe digitalmente como si fuera arcilla. Ideal para crear personajes y formas orgánicas detalladas."
+        },
+        { 
+          src: "../images/game2dstudio.png", 
+          alt: "Game 2D Studio", 
+          title: "Game 2D Studio", 
+          comingSoon: true, 
+          tags: ["code", "2d", "iniciación"],
+          description: "Desarrolla tus propios videojuegos 2D. Aprende lógica de programación de forma visual e intuitiva."
+        },
+        { 
+          src: "../images/game3dstudio.png", 
+          alt: "Game 3D Studio", 
+          title: "Game 3D Studio", 
+          comingSoon: true, 
+          tags: ["code", "3d", "avanzado"],
+          description: "Crea experiencias inmersivas en 3D. El siguiente nivel en el desarrollo de videojuegos profesionales."
+        },
+        { 
+          src: "../images/roboticsstudio.png", 
+          alt: "Robotics Studio", 
+          title: "Robotics Studio", 
+          comingSoon: true, 
+          tags: ["code", "avanzado"],
+          description: "Simula y programa robots en entornos virtuales. La puerta de entrada a la ingeniería y la robótica."
+        },
       ].map((proyecto) => (
         <div class="flex flex-col items-center text-center space-y-4 group">
           <div class="w-full rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
@@ -108,7 +150,7 @@ const tagStyles: Record<string, string> = {
             </div>
           </div>
           
-          <div class="flex flex-col items-center gap-3">
+          <div class="flex flex-col items-center gap-3 w-full px-2">
             <div class="space-y-1">
               <h5 class="text-base font-bold text-slate-800 uppercase tracking-wide">
                 {proyecto.title}
@@ -125,22 +167,173 @@ const tagStyles: Record<string, string> = {
               </div>
             </div>
 
+            <p class="text-xs text-slate-500 line-clamp-3 px-2 min-h-[3rem] flex items-center justify-center">
+              {proyecto.description}
+            </p>
+
             {proyecto.comingSoon ? (
-              <span class="text-[10px] uppercase font-bold px-5 py-2 rounded-xl border-2 border-slate-200 text-slate-400 cursor-default bg-slate-50/50">
+              <span class="text-[10px] uppercase font-bold px-5 py-2 rounded-xl border-2 border-slate-200 text-slate-400 cursor-default bg-slate-50/50 mt-auto">
                 Próximamente
               </span>
             ) : (
-              <a
-                href={proyecto.href}
-                class="text-[10px] uppercase font-bold px-6 py-2 rounded-xl border-2 border-[#007AFB] text-[#007AFB] hover:bg-[#007AFB] hover:text-white transition-all duration-300 active:scale-95 shadow-sm bg-white"
+              <button
+                type="button"
+                data-href={proyecto.href}
+                class="demo-button text-[10px] uppercase font-bold px-6 py-2 rounded-xl border-2 border-[#007AFB] text-[#007AFB] hover:bg-[#007AFB] hover:text-white transition-all duration-300 active:scale-95 shadow-sm bg-white mt-auto"
               >
                 Probar Editor
-              </a>
+              </button>
             )}
           </div>
         </div>
       ))}
     </div>
+
+    <!-- Modal de Advertencia Demo -->
+    <div id="demo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6">
+      <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" id="demo-modal-overlay"></div>
+      <div class="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100 transform transition-all scale-95 opacity-0 duration-300" id="demo-modal-content">
+        <div class="p-8 text-center">
+          <div class="w-16 h-16 bg-blue-50 text-[#007AFB] rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Aviso de versión Demo</h3>
+          <div class="text-slate-600 mb-8 leading-relaxed space-y-4">
+            <p>
+              Estás a punto de probar una <span class="font-bold text-[#007AFB]">versión demo limitada</span>. 
+              Esta demo técnica te permite explorar las funcionalidades básicas de nuestra herramienta.
+            </p>
+            <div class="bg-blue-50 p-4 rounded-xl flex items-start gap-4 text-left border border-blue-100">
+              <div class="text-blue-500 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </div>
+              <p class="text-sm text-blue-800">
+                Para tener una buena experiencia, te recomendamos probar esta app en un <span class="font-bold uppercase tracking-wider">PC y con ratón</span>.
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button id="demo-close-modal" class="flex-1 px-6 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors">
+              Cancelar
+            </button>
+            <button id="demo-confirm-button" class="flex-1 px-6 py-3 rounded-2xl bg-[#007AFB] text-white font-bold hover:bg-[#00477A] shadow-lg shadow-blue-200 transition-all active:scale-95">
+              Continuar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let pendingUrl = '';
+      const modal = document.getElementById('demo-modal');
+      const modalContent = document.getElementById('demo-modal-content');
+      const overlay = document.getElementById('demo-modal-overlay');
+      const closeBtn = document.getElementById('demo-close-modal');
+      const confirmBtn = document.getElementById('demo-confirm-button');
+      const demoButtons = document.querySelectorAll('.demo-button');
+      const modalTitle = modalContent?.querySelector('h3');
+      const modalBody = modalContent?.querySelector('.text-slate-600');
+
+      // Store initial state
+      const defaultTitle = modalTitle?.textContent || '';
+      const defaultBody = modalBody?.innerHTML || '';
+      const defaultCloseText = closeBtn?.textContent || 'Cancelar';
+
+      function updateModalContent(isMobile: boolean) {
+        if (!modalTitle || !modalBody || !confirmBtn || !closeBtn) return;
+
+        if (isMobile) {
+          modalTitle.textContent = 'Dispositivo no compatible';
+          modalBody.innerHTML = `
+            <p>
+              Lo sentimos, esta aplicación <span class="font-bold text-red-500">no está disponible en móviles</span>.
+            </p>
+            <div class="bg-red-50 p-4 rounded-xl flex items-start gap-4 text-left border border-red-100 mt-4">
+              <div class="text-red-500 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                  <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                </svg>
+              </div>
+              <p class="text-sm text-red-800">
+                Esta herramienta requiere una pantalla más grande y un ratón. Por favor, accede desde un <span class="font-bold uppercase tracking-wider">PC o Tablet</span>.
+              </p>
+            </div>
+          `;
+          confirmBtn.style.display = 'none';
+          closeBtn.textContent = 'Entendido';
+          closeBtn.classList.remove('border-slate-200', 'text-slate-600', 'hover:bg-slate-50');
+          closeBtn.classList.add('bg-slate-900', 'text-white', 'hover:bg-slate-800', 'border-transparent');
+        } else {
+          modalTitle.textContent = defaultTitle;
+          modalBody.innerHTML = defaultBody;
+          confirmBtn.style.display = '';
+          closeBtn.textContent = defaultCloseText;
+          
+          // Restore button styles
+          closeBtn.classList.add('border-slate-200', 'text-slate-600', 'hover:bg-slate-50');
+          closeBtn.classList.remove('bg-slate-900', 'text-white', 'hover:bg-slate-800', 'border-transparent');
+        }
+      }
+
+      function openModal(url: string) {
+        pendingUrl = url;
+        const isMobile = window.innerWidth < 768;
+        
+        updateModalContent(isMobile);
+
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
+        
+        // Trigger animation
+        setTimeout(() => {
+          modalContent?.classList.remove('scale-95', 'opacity-0');
+          modalContent?.classList.add('scale-100', 'opacity-100');
+        }, 10);
+      }
+
+      function closeModal() {
+        modalContent?.classList.add('scale-95', 'opacity-0');
+        modalContent?.classList.remove('scale-100', 'opacity-100');
+        
+        setTimeout(() => {
+          modal?.classList.add('hidden');
+          modal?.classList.remove('flex');
+          pendingUrl = '';
+        }, 300);
+      }
+
+      demoButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const url = (e.currentTarget as HTMLElement).dataset.href;
+          if (url) openModal(url);
+        });
+      });
+
+      overlay?.addEventListener('click', closeModal);
+      closeBtn?.addEventListener('click', closeModal);
+      confirmBtn?.addEventListener('click', () => {
+        if (pendingUrl) {
+          window.location.href = pendingUrl;
+        }
+      });
+
+      // Close on Escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+    </script>
 
 
     <!-- Texto y botón en 2 columnas -->
@@ -181,28 +374,31 @@ const tagStyles: Record<string, string> = {
         </ul>
       </div>
 
-      <!-- Columna Derecha: Contacto y Botón -->
-      <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col justify-center gap-6">
-        <h4 class="text-lg md:text-xl text-slate-700 leading-relaxed">
-          Contacta con nosotros para implementar estas herramientas de software en tu centro educativo y potenciar el aprendizaje de tus alumnos.
+      <!-- Columna Derecha: Contacto y Botones -->
+      <div class="bg-slate-50 p-8 md:p-10 rounded-[2.5rem] border border-slate-100 flex flex-col justify-center gap-8 shadow-sm">
+        <h4 class="text-xl md:text-2xl text-slate-700 leading-relaxed font-medium">
+          Contacta con nosotros para implementar estas herramientas en tu centro de forma profesional o pruébalas gratis ahora mismo.
         </h4>
-        <a
-          href="mailto:info@codemaker.es"
-          aria-label="Quiero estas apps en mi centro"
-          class="inline-flex justify-center items-center text-slate-50 px-8 py-4 rounded-2xl bg-[#007AFB] hover:bg-[#00477A] font-bold transition-all shadow-lg hover:shadow-blue-200 active:scale-95 text-lg"
-        >
-          Quiero estas apps en mi centro
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="ml-2 size-6"
+        
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button
+            class="contact-trigger flex-1 inline-flex justify-center items-center text-slate-50 px-8 py-4 rounded-2xl bg-[#007AFB] hover:bg-[#00477A] font-bold transition-all shadow-lg hover:shadow-blue-200 active:scale-95 text-lg"
           >
-            <path
-              d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z"
-            ></path>
-          </svg>
-        </a>
+            Quiero estas apps
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-2 size-5">
+              <path d="M16.0037 9.41421L7.39712 18.0208L5.98291 16.6066L14.5895 8H7.00373V6H18.0037V17H16.0037V9.41421Z"></path>
+            </svg>
+          </button>
+          
+          <button
+            class="pricing-trigger flex-1 inline-flex justify-center items-center text-[#007AFB] px-8 py-4 rounded-2xl bg-white border-2 border-[#007AFB] hover:bg-slate-50 font-bold transition-all shadow-sm active:scale-95 text-lg"
+          >
+            Pruébalas gratis
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-2 size-5">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"></path>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>

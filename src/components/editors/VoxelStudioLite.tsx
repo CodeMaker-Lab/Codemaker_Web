@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
-    MousePointer2,
+
     Box,
-    ArrowLeft,
+
     Trash2,
     Hammer,
     Eraser,
@@ -16,12 +16,18 @@ import {
     LogOut,
     CheckCircle2,
     AlertCircle,
-    X
+    X,
+    Crown,
+    Rocket,
+    Cloud,
+    Users,
+    Layout as LayoutIcon,
+    Award
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * VoxelStudioLite - Una versión independiente y autocontenida del editor de Vóxeles.
+ * VoxelStudioDemo - Una versión independiente y autocontenida del editor de Vóxeles para pruebas.
  * 
  * Requisitos de instalación en el proyecto de destino:
  * npm install three lucide-react uuid
@@ -127,10 +133,10 @@ const STYLES = {
         flexDirection: 'column' as const,
         gap: '8px',
     },
-    btn: (active: boolean, color: string = '#007AFB') => ({
-        width: '44px',
-        height: '44px',
-        borderRadius: '8px',
+    btn: (active: boolean, color: string = '#007AFB', small: boolean = false) => ({
+        width: small ? '36px' : '44px',
+        height: small ? '36px' : '44px',
+        borderRadius: small ? '6px' : '8px',
         border: 'none',
         cursor: 'pointer',
         transition: 'all 0.2s',
@@ -244,6 +250,7 @@ const VoxelStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
     const [activeTool, setActiveTool] = useState<ToolMode>('build');
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [isPremiumOpen, setIsPremiumOpen] = useState(false);
     const [notification, setNotification] = useState<{ message: string; type: 'success' | 'warning' | 'error' } | null>(null);
 
     const handleExit = () => {
@@ -268,7 +275,7 @@ const VoxelStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
     };
 
     const handleLiteMessage = () => {
-        showAlert("Función desactivada en la versión Lite.");
+        showAlert("Función desactivada en la versión Demo.");
     };
 
     // Inicialización de la Escena
@@ -514,8 +521,11 @@ const VoxelStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                         <Box size={20} style={{ color: '#4ade80' }} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
-                        <h1 style={{ fontSize: '14px', fontWeight: 'bold', margin: 0, color: '#d1d5db' }}>Codemaker 3D</h1>
-                        <span style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', color: '#4ade80' }}>Voxel Lite</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'white' }}>Codemaker</span>
+                            <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#000', backgroundColor: '#4ade80', padding: '1px 5px', borderRadius: '4px' }}>DEMO</span>
+                        </div>
+                        <span style={{ fontSize: '10px', color: '#9ca3af', letterSpacing: '0.5px' }}>Voxel Studio</span>
                     </div>
                 </div>
 
@@ -529,17 +539,20 @@ const VoxelStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                     />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', padding: '4px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                            <button onClick={handleLiteMessage} style={{ ...STYLES.btn(false), opacity: 0.5, cursor: 'not-allowed' }} title="Guardar (Desactivado)">
-                                <Save size={16} />
+                            <button onClick={handleLiteMessage} style={{ ...STYLES.btn(false, '', true), opacity: 0.5, cursor: 'not-allowed' }} title="Guardar (Desactivado)">
+                                <Save size={14} />
                             </button>
-                            <button onClick={() => window.location.reload()} style={STYLES.btn(false)} title="Recargar">
-                                <RefreshCw size={16} />
+                            <button onClick={() => window.location.reload()} style={STYLES.btn(false, '', true)} title="Recargar">
+                                <RefreshCw size={14} />
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+                    <button onClick={() => setIsPremiumOpen(true)} style={{ ...STYLES.btn(false), color: '#fbbf24' }} title="Funciones Premium">
+                        <Crown size={20} />
+                    </button>
                     <button onClick={() => setIsHelpOpen(true)} style={STYLES.btn(false)} title="Ayuda">
                         <HelpCircle size={20} />
                     </button>
@@ -621,6 +634,40 @@ const VoxelStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                 {activeTool === 'paint' && "🎨 Haz clic en cubos para cambiar color."}
             </div>
 
+            {/* PREMIUM MODAL */}
+            {isPremiumOpen && (
+                <div style={STYLES.modalOverlay}>
+                    <div style={{ ...STYLES.modal, maxWidth: '440px' }}>
+                        <button onClick={() => setIsPremiumOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
+                            <X size={24} />
+                        </button>
+
+                        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                            <div style={{ display: 'inline-flex', padding: '12px', borderRadius: '20px', backgroundColor: 'rgba(251, 191, 36, 0.1)', marginBottom: '16px' }}>
+                                <Crown size={32} style={{ color: '#fbbf24' }} />
+                            </div>
+                            <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: 'white' }}>Funciones Premium</h2>
+                            <p style={{ color: '#9ca3af', fontSize: '14px', marginTop: '8px' }}>Desbloquea todo el potencial de Codemaker para tu centro</p>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {[
+                                { icon: <Users size={18} />, text: "Crear aulas y cuentas de alumnos", color: '#60a5fa' },
+                                { icon: <Cloud size={18} />, text: "Guardar proyectos en la nube", color: '#60a5fa' },
+                                { icon: <Award size={18} />, text: "Evaluar y calificar proyectos", color: '#60a5fa' },
+                                { icon: <Rocket size={18} />, text: "Gamificación y retos avanzados", color: '#60a5fa' },
+                                { icon: <LayoutIcon size={18} />, text: "Acceso a todos los editores PRO", color: '#60a5fa' },
+                            ].map((item, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ color: item.color }}>{item.icon}</div>
+                                    <span style={{ fontSize: '14px', color: '#d1d5db' }}>{item.text}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* HELP MODAL */}
             {isHelpOpen && (
                 <div style={STYLES.modalOverlay}>
@@ -628,8 +675,8 @@ const VoxelStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                         <button onClick={() => setIsHelpOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
                             <X size={24} />
                         </button>
-                        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px', color: '#4ade80' }}>
-                            <Box /> Guía de Voxel Lite
+                        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', marginTop: 0, display: 'flex', alignItems: 'center', gap: '12px', color: '#4ade80' }}>
+                            <Box /> Guía de Voxel Demo
                         </h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', color: '#d1d5db' }}>
                             <section>
@@ -643,10 +690,19 @@ const VoxelStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                             </section>
                             <section>
                                 <h3 style={{ color: 'white', fontWeight: 'bold', marginBottom: '8px', marginTop: 0 }}>Herramientas</h3>
-                                <ul style={{ paddingLeft: '20px', margin: 0, lineHeight: '1.6' }}>
-                                    <li><strong>Martillo:</strong> Añadir cubos sobre caras existentes.</li>
-                                    <li><strong>Paleta:</strong> Cambiar el color de los cubos.</li>
-                                    <li><strong>Goma:</strong> Eliminar cubos.</li>
+                                <ul style={{ paddingLeft: '0', listStyle: 'none', margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ padding: '6px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.05)' }}><Hammer size={16} style={{ color: '#007AFB' }} /></div>
+                                        <span><strong>Martillo:</strong> Añadir cubos sobre caras existentes.</span>
+                                    </li>
+                                    <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ padding: '6px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.05)' }}><Palette size={16} style={{ color: '#007AFB' }} /></div>
+                                        <span><strong>Paleta:</strong> Cambiar el color de los cubos.</span>
+                                    </li>
+                                    <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ padding: '6px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.05)' }}><Eraser size={16} style={{ color: '#ef4444' }} /></div>
+                                        <span><strong>Goma:</strong> Eliminar cubos.</span>
+                                    </li>
                                 </ul>
                             </section>
                         </div>

@@ -58,7 +58,7 @@ export class SculptBrush {
             const symPoint = new THREE.Vector3(-point.x, point.y, point.z);
             const symNormal = new THREE.Vector3(-normal.x, normal.y, normal.z);
             // Symmetry for legacy/stateless calls
-            let symDragDir;
+            let symDragDir: THREE.Vector3 | undefined;
             if (dragDir) {
                 symDragDir = new THREE.Vector3(-dragDir.x, dragDir.y, dragDir.z);
             }
@@ -85,38 +85,7 @@ export class SculptBrush {
             // But Symmetry Brush (Left) should be pulling it Left.
             // By enforcing "closest center wins", we ensure Left vertices behave consistently.
 
-            const filterData = (data: DragData, ownCenter: THREE.Vector3, otherCenter: THREE.Vector3) => {
-                const newIndices: number[] = [];
-                const newFalloffs: number[] = [];
-                const newOriginals: THREE.Vector3[] = [];
 
-                for (let i = 0; i < data.indices.length; i++) {
-                    const idx = data.indices[i];
-                    const pos = data.originalPositions[i]; // Use original pos for distance check
-
-                    const distOwn = pos.distanceToSquared(ownCenter);
-                    const distOther = pos.distanceToSquared(otherCenter);
-
-                    // Strictly closest. If equal, Main wins (<= vs <) or arbitrary choice.
-                    // Main takes <=, Sym takes < to handle exact center line without changing ownership?
-                    // actually if dists are equal (center line), it doesn't matter much as long as it's consistent.
-                    // Let's iterate main first.
-
-                    const isOwner = distOwn <= distOther; // Main logic (roughly)
-                    // Wait, this function is generic. 
-                    // Usage: filterData(mainData, center, symCenter) -> keep if distOwn <= distOther
-
-                    // Actually, if I just modify arrays in place or return new ones.
-                    if (distOwn <= distOther) {
-                        newIndices.push(idx);
-                        newFalloffs.push(data.falloffs[i]);
-                        newOriginals.push(pos);
-                    }
-                }
-                data.indices = newIndices;
-                data.falloffs = newFalloffs;
-                data.originalPositions = newOriginals;
-            };
 
             // Calculate distances to decide ownership
             // note: we need to do this carefully.

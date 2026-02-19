@@ -45,31 +45,30 @@ const levelInfo = {
   }
 };
 
-const info = levelInfo[level];
+const normalizedLevel = (level?.toLowerCase() || 'junior') as keyof typeof levelInfo;
+const info = levelInfo[normalizedLevel];
 ---
 
-<div class={`bg-white rounded-3xl border-4 ${info.color} p-8 shadow-xl transition-transform hover:scale-[1.02] duration-300`}>
-  <div class="flex flex-col gap-4">
+<div class={`bg-white rounded-2xl border border-slate-200 ${info.color.replace('border-', 'border-l-8 md:border-l-8 ')} p-8 shadow-sm hover:shadow-md transition-all duration-300 group`}>
+  <div class="flex flex-col gap-5">
     <div class="flex items-baseline gap-2">
-      <h3 class="text-2xl font-black text-slate-800 tracking-tight">{info.title}</h3>
-      <span class="text-slate-500 font-medium">{info.years}</span>
+      <h3 class="text-2xl font-bold text-slate-800 tracking-tight">{info.title}</h3>
+      <span class="text-slate-500 font-medium text-sm">{info.years}</span>
     </div>
     
-    <p class="text-slate-600 leading-relaxed font-bold">
+    <p class="text-slate-600 leading-relaxed font-medium">
       {info.description}
     </p>
 
     <ul class="space-y-3 mt-2">
       {info.contents.map(item => (
-        <li class="flex gap-3 text-slate-600 text-sm font-medium">
-          <svg class={`h-5 w-5 flex-none ${info.iconColor}`} viewBox="0 0 20 20" fill="currentColor">
+        <li class="flex gap-3 text-slate-600 text-sm font-medium leading-tight">
+          <svg class={`h-5 w-5 flex-none ${info.iconColor} group-hover:scale-110 transition-transform`} viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
           {item}
         </li>
       ))}
-    </ul>
-
     </ul>
   </div>
 </div>

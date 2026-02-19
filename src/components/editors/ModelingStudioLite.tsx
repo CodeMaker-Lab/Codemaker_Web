@@ -5,9 +5,10 @@ import {
     OrbitControls,
     TransformControls,
     Grid,
+    Edges,
     PerspectiveCamera,
     OrthographicCamera,
-    Outlines,
+
     ContactShadows
 } from '@react-three/drei';
 import { SUBTRACTION, ADDITION, Brush, Evaluator } from 'three-bvh-csg';
@@ -20,7 +21,7 @@ import {
     Square,
     Move,
     RotateCw,
-    Scaling,
+
     Trash2,
     Image as ImageIcon,
     Palette,
@@ -52,8 +53,15 @@ import {
     Scan,
     Eraser,
     Magnet,
-    ChevronUp,
-    ChevronDown
+
+    Crown,
+    Users,
+    Cloud,
+    Award,
+    Rocket,
+    Layout as LayoutIcon,
+    Eye,
+    Maximize2
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -79,6 +87,7 @@ interface ISceneObject {
     originalColor?: string;
     originalTexture?: string;
     texture?: string;
+    isHole?: boolean;
     geometry?: THREE.BufferGeometry;
     composition?: {
         operation: 'UNION' | 'SUBTRACT' | 'INTERSECT';
@@ -112,6 +121,10 @@ const TEXTURES = [
     { name: 'Piedra', url: '/textures/stone.jpg' },
     { name: 'Metal', url: '/textures/metal.jpg' },
     { name: 'Tela', url: '/textures/fabric.jpg' },
+    { name: 'Asfalto', url: '/textures/asphalt.jpg' },
+    { name: 'Cristal', url: '/textures/glass.jpg' },
+    { name: 'Hierba', url: '/textures/grass.jpg' },
+    { name: 'Tejado', url: '/textures/roof.jpg' },
 ];
 
 // Helper: Geometry Factory
@@ -137,7 +150,8 @@ const createMeshFromObject = (obj: ISceneObject): THREE.Mesh => {
     const material = new THREE.MeshStandardMaterial({
         color: obj.color,
         roughness: 0.5,
-        metalness: 0.1
+        metalness: 0.1,
+        side: THREE.DoubleSide
     });
 
     const mesh = new THREE.Mesh(geometry, material);
@@ -166,6 +180,8 @@ const ShapePreview: React.FC<{ type: ShapeType; color?: string }> = ({ type, col
                     {type === 'pyramid' && <coneGeometry args={[0.8, 1.4, 4, 1, false, Math.PI / 4]} />}
                     {type === 'prism' && <cylinderGeometry args={[0.5, 0.5, 1, 3]} />}
                     {type === 'torus' && <torusGeometry args={[0.6, 0.3, 16, 32]} />}
+                    {type === 'plane' && <planeGeometry args={[1.4, 1.4]} />}
+                    {type === 'capsule' && <capsuleGeometry args={[0.5, 0.8, 4, 16]} />}
                     <meshStandardMaterial color={finalColor} roughness={0.4} metalness={0.2} />
                 </mesh>
             </Canvas>
@@ -204,9 +220,11 @@ const SceneObject: React.FC<{
     isSelected: boolean,
     onRef: (id: string, ref: THREE.Group | null) => void,
     onSelect: (id: string, shift: boolean) => void,
-    onDragStart: (id: string, event: any) => void
-}> = ({ object, isSelected, onRef, onSelect, onDragStart }) => {
-    const isHole = object.color === '#ffffff4d';
+    onDragStart: (id: string, event: any) => void,
+    selectionMode: 'cursor' | 'box'
+}> = ({ object, isSelected, onRef, onSelect, onDragStart, selectionMode }) => {
+    const { scene, raycaster, pointer, camera } = useThree();
+    const isHole = object.isHole;
     const groupRef = useRef<THREE.Group>(null);
 
     useEffect(() => {
@@ -221,7 +239,66 @@ const SceneObject: React.FC<{
             rotation={object.rotation}
             scale={object.scale}
             onPointerDown={(e) => {
+                // Si estamos en modo caja, no detenemos la propagación para que el Canvas
+                // pueda iniciar el dibujo de la caja de selección.
+                if (selectionMode === 'box') return;
+
                 e.stopPropagation();
+
+                // --- FIX: PRIORIDAD AL GIZMO (Profundo & Tolerante) ---
+                // Buscamos en TODAS las intersecciones con una pequeña tolerancia (fuzziness)
+                // para que no haga falta acertar al pixel exacto del gizmo.
+                raycaster.setFromCamera(pointer, camera);
+
+                // Guardamos umbrales originales
+                const oldLineThreshold = raycaster.params.Line?.threshold || 0;
+
+                // Aplicamos una zona de "hit" más generosa para las líneas del gizmo
+                if (raycaster.params.Line) raycaster.params.Line.threshold = 0.2;
+
+                const allIntersections = raycaster.intersectObjects(scene.children, true);
+
+                // Restauramos umbral
+                if (raycaster.params.Line) raycaster.params.Line.threshold = oldLineThreshold;
+
+                // Comprobamos las intersecciones. La lógica es:
+                // 1. Si lo PRIMERO que encontramos es un Gizmo, le damos prioridad (break y return -> selection blocked by gizmo).
+                // 2. Si lo PRIMERO que encontramos es un Objeto (que no tiene gizmo o no es el seleccionado),
+                //    entonces queremos seleccionarlo a él, así que ignoramos el Gizmo si está DETRÁS.
+
+                let isTransformHandle = false;
+                for (let i = 0; i < Math.min(allIntersections.length, 10); i++) {
+                    const hit = allIntersections[i].object;
+                    let p: THREE.Object3D | null = hit;
+
+                    let isGizmoPart = false;
+                    while (p) {
+                        if (p.type === 'TransformControlsPlane' || p.name?.toLowerCase().includes('gizmo')) {
+                            isGizmoPart = true;
+                            break;
+                        }
+                        p = p.parent;
+                    }
+
+                    if (isGizmoPart) {
+                        // Encontramos gizmo primero (o cerca). Prioridad al gizmo.
+                        isTransformHandle = true;
+                        break;
+                    } else {
+                        // Encontramos un objeto que NO es gizmo.
+                        // Si este objeto es distinto al actual y está por delante del gizmo,
+                        // entonces el usuario quería seleccionar este objeto.
+                        // PERO cuidado: isSelectable check.
+                        if (hit.userData?.isSelectable || hit.parent?.userData?.isSelectable) {
+                            // Si el objeto golpeado NO es parte del gizmo, asumimos que es un objeto de la escena.
+                            // Si está delante, bloquea al gizmo.
+                            break;
+                        }
+                    }
+                }
+
+                if (isTransformHandle) return;
+
                 onSelect(object.id, e.shiftKey);
                 onDragStart(object.id, e);
             }}
@@ -243,15 +320,23 @@ const SceneObject: React.FC<{
                 )}
 
                 <meshStandardMaterial
-                    color={isHole ? '#ffffff' : object.color}
+                    color={object.color}
                     transparent={isHole}
-                    opacity={isHole ? 0.3 : 1}
+                    opacity={isHole ? 0.4 : 1}
                     roughness={0.7}
-                    flatShading={['box', 'prism', 'pyramid'].includes(object.type)}
+                    metalness={0.1}
+                    side={THREE.DoubleSide}
+                    shadowSide={THREE.DoubleSide}
+                    flatShading={false}
                 />
 
                 {isSelected && (
-                    <Outlines thickness={3} color="#FF6600" screenspace={false} />
+                    <Edges
+                        threshold={35} // Solo muestra bordes si el ángulo entre caras es > 35 grados (oculta triangulación interna)
+                        color="#FF6600"
+                        scale={1}
+                        renderOrder={1000}
+                    />
                 )}
             </mesh>
         </group>
@@ -262,8 +347,8 @@ const DragManager: React.FC<{
     dragRef: React.MutableRefObject<{ id: string | null, plane: THREE.Plane, offset: THREE.Vector3 }>,
     objectRefs: React.MutableRefObject<{ [id: string]: THREE.Group | null }>,
     onUpdate: (id: string, pos: [number, number, number]) => void
-}> = ({ dragRef, objectRefs, onUpdate }) => {
-    const { raycaster, mouse, camera } = useThree();
+}> = ({ dragRef, objectRefs }) => {
+    const { raycaster, pointer, camera } = useThree();
 
     useFrame(() => {
         if (dragRef.current.id) {
@@ -271,7 +356,7 @@ const DragManager: React.FC<{
             const group = objectRefs.current[id];
             if (!group) return;
 
-            raycaster.setFromCamera(mouse, camera);
+            raycaster.setFromCamera(pointer, camera);
             const intersectPoint = new THREE.Vector3();
             if (raycaster.ray.intersectPlane(dragRef.current.plane, intersectPoint)) {
                 const newPos = intersectPoint.sub(dragRef.current.offset);
@@ -295,6 +380,9 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
     const [isOrtho, setIsOrtho] = useState(false);
     const [selectionMode, setSelectionMode] = useState<'cursor' | 'box'>('cursor');
     const [selectionBox, setSelectionBox] = useState<{ start: { x: number, y: number }, end: { x: number, y: number } } | null>(null);
+    const [isPremiumOpen, setIsPremiumOpen] = useState(false);
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [isDraggingDirectly, setIsDraggingDirectly] = useState(false);
 
     const orbitControlsRef = useRef<any>(null);
     const cameraRef = useRef<THREE.Camera>(null);
@@ -307,6 +395,14 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
         offset: new THREE.Vector3()
     });
 
+    const handleExit = () => {
+        if (onExit) {
+            onExit();
+        } else {
+            window.location.href = '/';
+        }
+    };
+
     const selectedObjects = useMemo(() => objects.filter(o => selectedIds.includes(o.id)), [objects, selectedIds]);
     const firstSelected = selectedObjects[0];
 
@@ -315,13 +411,13 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
     };
 
     const handleLiteMessage = (customMsg?: string) => {
-        showAlert(customMsg || "Esta función está desactivada en la versión Lite.");
+        showAlert(customMsg || "Esta función está desactivada en la versión Demo.");
     };
 
     const addObject = (type: ShapeType) => {
-        const disabledTypes: ShapeType[] = ['prism', 'torus'];
-        if (disabledTypes.includes(type)) {
-            handleLiteMessage("Esta figura no está disponible en la versión Lite.");
+        const allowedTypes: ShapeType[] = ['box', 'sphere', 'cylinder'];
+        if (!allowedTypes.includes(type)) {
+            handleLiteMessage("Esta figura no está disponible en la versión Demo.");
             return;
         }
 
@@ -337,6 +433,7 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
         setObjects(prev => [...prev, newObj]);
         setSelectedIds([newObj.id]);
         setActiveMenu(null);
+        setActiveRightTab('inspector');
     };
 
     const deleteSelected = () => {
@@ -355,6 +452,7 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
         }));
         setObjects(prev => [...prev, ...newOnes]);
         setSelectedIds(newOnes.map(o => o.id));
+        setActiveRightTab('inspector');
     };
 
     const updateObject = (id: string, changes: Partial<ISceneObject>) => {
@@ -392,97 +490,9 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
         }
     };
 
-    const performBooleanOperation = () => {
-        if (selectedIds.length !== 2) return;
 
-        const obj1 = objects.find(o => o.id === selectedIds[0]);
-        const obj2 = objects.find(o => o.id === selectedIds[1]);
-        if (!obj1 || !obj2) return;
 
-        const isHole1 = obj1.color === '#ffffff4d';
-        const isHole2 = obj2.color === '#ffffff4d';
 
-        let targetObj = obj1;
-        let brushObj = obj2;
-        let operation = ADDITION;
-
-        if (isHole1 && !isHole2) {
-            targetObj = obj2;
-            brushObj = obj1;
-            operation = SUBTRACTION;
-        } else if (!isHole1 && isHole2) {
-            targetObj = obj1;
-            brushObj = obj2;
-            operation = SUBTRACTION;
-        }
-
-        // Create Meshes
-        const targetMesh = createMeshFromObject(targetObj);
-        const brushMesh = createMeshFromObject(brushObj);
-
-        // Convert to CSG Brushes
-        const targetEval = new Brush(targetMesh.geometry, targetMesh.material as THREE.Material);
-        targetEval.position.copy(targetMesh.position);
-        targetEval.rotation.copy(targetMesh.rotation);
-        targetEval.scale.copy(targetMesh.scale);
-        targetEval.updateMatrixWorld();
-
-        const brushEval = new Brush(brushMesh.geometry, brushMesh.material as THREE.Material);
-        brushEval.position.copy(brushMesh.position);
-        brushEval.rotation.copy(brushMesh.rotation);
-        brushEval.scale.copy(brushMesh.scale);
-        brushEval.updateMatrixWorld();
-
-        // Evaluate
-        const evaluator = new Evaluator();
-        const result = evaluator.evaluate(targetEval, brushEval, operation);
-
-        // Process Result
-        let resultGeometry = result.geometry;
-        resultGeometry = BufferGeometryUtils.mergeVertices(resultGeometry);
-        resultGeometry.computeVertexNormals();
-
-        resultGeometry.computeBoundingBox();
-        const center = new THREE.Vector3();
-        if (resultGeometry.boundingBox) {
-            resultGeometry.boundingBox.getCenter(center);
-            resultGeometry.translate(-center.x, -center.y, -center.z);
-        }
-
-        const newId = uuidv4();
-        const newObject: ISceneObject = {
-            id: newId,
-            type: 'custom',
-            name: operation === SUBTRACTION ? 'Corte' : 'Unión',
-            position: [center.x, center.y, center.z],
-            rotation: [0, 0, 0],
-            scale: [1, 1, 1],
-            color: targetObj.color,
-            texture: targetObj.texture,
-            geometry: resultGeometry,
-            composition: {
-                operation: operation === SUBTRACTION ? 'SUBTRACT' : 'UNION',
-                components: [obj1, obj2],
-                center: [center.x, center.y, center.z]
-            }
-        };
-
-        setObjects(prev => [...prev.filter(o => o.id !== obj1.id && o.id !== obj2.id), newObject]);
-        setSelectedIds([newId]);
-    };
-
-    const ungroupObject = (id: string) => {
-        const obj = objects.find(o => o.id === id);
-        if (!obj || !obj.composition) return;
-
-        const restoredObjects = obj.composition.components.map(comp => ({
-            ...comp,
-            id: uuidv4()
-        }));
-
-        setObjects(prev => [...prev.filter(o => o.id !== id), ...restoredObjects]);
-        setSelectedIds(restoredObjects.map(o => o.id));
-    };
 
     const handleObjectSelect = useCallback((id: string, shift: boolean) => {
         if (shift) {
@@ -546,20 +556,39 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
         const group = objectRefs.current[id];
         if (!group || !cameraRef.current) return;
 
-        // Create a plane at the object's position facing the camera's Z axis
-        const planePadding = new THREE.Vector3(0, 0, 1).applyQuaternion(cameraRef.current.quaternion);
+        // Si el raycast ha impactado primero en un handle del Gizmo (o cualquier cosa delante del objeto 
+        // que no sea el objeto mismo), cancelamos el arrastre directo para dejar paso al Gizmo.
+        // FIX: No confiamos ciegamente en e.intersections[0] porque puede ser el Gizmo que acabamos de ignorar en onPointerDown.
+        // Si hemos llegado aquí, es porque onPointerDown decidió que queríamos arrastrar ESTE objeto.
+        // Simplemente verificamos que el objeto intersectado sea parte de nuestro grupo o sus hijos.
+        // Ojo: e.intersections puede venir ordenado por distancia. Buscamos el primer hit que sea "nosotros".
+
+        const hit = e.intersections.find((i: any) => {
+            let p = i.object;
+            while (p) {
+                if (p === group) return true;
+                p = p.parent;
+            }
+            return false;
+        });
+
+        if (!hit) return;
+
+        // Plano XZ (Y constante) para el movimiento
+        const normal = new THREE.Vector3(0, 1, 0);
         dragObjectRef.current.plane.setFromNormalAndCoplanarPoint(
-            planePadding,
+            normal,
             group.position
         );
 
-        // Calculate initial offset
+        // Calcular el punto de intersección inicial en el plano XZ
         const intersectPoint = new THREE.Vector3();
-        e.ray.intersectPlane(dragObjectRef.current.plane, intersectPoint);
-        dragObjectRef.current.offset.copy(intersectPoint).sub(group.position);
-        dragObjectRef.current.id = id;
-
-        if (orbitControlsRef.current) orbitControlsRef.current.enabled = false;
+        if (e.ray.intersectPlane(dragObjectRef.current.plane, intersectPoint)) {
+            dragObjectRef.current.offset.copy(intersectPoint).sub(group.position);
+            dragObjectRef.current.id = id;
+            setIsDraggingDirectly(true);
+            if (orbitControlsRef.current) orbitControlsRef.current.enabled = false;
+        }
     };
 
     const handleCanvasPointerMove = (e: React.PointerEvent) => {
@@ -578,6 +607,7 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                 updateObject(id, { position: [group.position.x, group.position.y, group.position.z] });
             }
             dragObjectRef.current.id = null;
+            setIsDraggingDirectly(false);
             if (orbitControlsRef.current) orbitControlsRef.current.enabled = true;
         }
 
@@ -624,7 +654,7 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
 
             dragBoxRef.current.start = null;
             setSelectionBox(null);
-            if (orbitControlsRef.current) orbitControlsRef.current.enabled = true;
+            if (orbitControlsRef.current) orbitControlsRef.current.enabled = (selectionMode !== 'box');
         }
     };
     return (
@@ -683,10 +713,11 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                         onRef={setObjRef}
                         onSelect={handleObjectSelect}
                         onDragStart={handleDragStart}
+                        selectionMode={selectionMode}
                     />
                 ))}
 
-                {selectedIds.length === 1 && objectRefs.current[selectedIds[0]] && (
+                {selectedIds.length === 1 && objectRefs.current[selectedIds[0]] && !isDraggingDirectly && (
                     <TransformControls
                         mode={transformMode}
                         object={objectRefs.current[selectedIds[0]]!}
@@ -738,13 +769,16 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                     border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', display: 'flex',
                     alignItems: 'center', padding: '0 16px', gap: '16px', zIndex: 100, pointerEvents: 'auto'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: 'auto', cursor: 'pointer' }} onClick={onExit}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: 'auto', cursor: 'pointer' }} onClick={handleExit}>
                         <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.3)', display: 'flex' }}>
                             <Box size={20} color="#60a5fa" />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#d1d5db' }}>Codemaker 3D</span>
-                            <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#60a5fa', textTransform: 'uppercase' }}>Modelado Lite</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'white' }}>Codemaker</span>
+                                <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#000', backgroundColor: '#60a5fa', padding: '1px 5px', borderRadius: '4px' }}>DEMO</span>
+                            </div>
+                            <span style={{ fontSize: '10px', color: '#9ca3af', letterSpacing: '0.5px' }}>Modeling Studio</span>
                         </div>
                     </div>
 
@@ -760,8 +794,12 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
-                        <button onClick={() => setActiveRightTab('inspector')} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }}><HelpCircle size={20} /></button>
-                        <button onClick={onExit} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }}><LogOut size={20} /></button>
+                        <button onClick={() => setIsPremiumOpen(true)} style={{ background: 'none', border: 'none', color: '#fbbf24', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', position: 'relative', marginRight: '4px' }} title="Ver Funciones Premium">
+                            <Crown size={20} />
+                        </button>
+                        <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+                        <button onClick={() => setIsHelpOpen(true)} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }} title="Guía de Ayuda"><HelpCircle size={20} /></button>
+                        <button onClick={handleExit} style={{ background: 'none', border: 'none', color: '#9ca3af', padding: '8px', cursor: 'pointer' }} title="Salir"><LogOut size={20} /></button>
                     </div>
                 </header>
 
@@ -790,18 +828,25 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                                         FORMAS BÁSICAS
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', padding: '8px', background: 'rgba(0,0,0,0.2)' }}>
-                                        {BASIC_MODELS.map(m => (
-                                            <button
-                                                key={m.type} onClick={() => addObject(m.type)}
-                                                style={{
-                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '12px 4px',
-                                                    background: 'none', border: 'none', color: '#ccc', cursor: 'pointer', borderRadius: '8px'
-                                                }}
-                                            >
-                                                <ShapePreview type={m.type} />
-                                                <span style={{ fontSize: '10px', marginTop: '4px' }}>{m.label}</span>
-                                            </button>
-                                        ))}
+                                        {BASIC_MODELS.map(m => {
+                                            const isEnabled = ['box', 'sphere', 'cylinder'].includes(m.type);
+                                            return (
+                                                <button
+                                                    key={m.type}
+                                                    onClick={() => addObject(m.type)}
+                                                    style={{
+                                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '12px 4px',
+                                                        background: 'none', border: 'none', color: isEnabled ? '#ccc' : '#666',
+                                                        cursor: isEnabled ? 'pointer' : 'default', borderRadius: '8px',
+                                                        opacity: isEnabled ? 1 : 0.4,
+                                                        filter: isEnabled ? 'none' : 'grayscale(1)'
+                                                    }}
+                                                >
+                                                    <ShapePreview type={m.type} color={isEnabled ? '#007AFB' : '#666'} />
+                                                    <span style={{ fontSize: '10px', marginTop: '4px' }}>{m.label}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                     <button onClick={() => handleLiteMessage()} style={{ width: '100%', padding: '10px 12px', fontSize: '10px', fontWeight: 'bold', color: '#444', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: 'none', borderTop: '1px solid rgba(255,255,255,0.05)', cursor: 'not-allowed' }}>
                                         MOCHILA <ChevronRight size={12} />
@@ -813,25 +858,25 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
 
                     {/* CAMERA TOOLS */}
                     <div style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <button onClick={handleResetCamera} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'none', color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Vista Inicio"><Home size={20} /></button>
+                        <button onClick={handleResetCamera} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Vista Inicio"><Home size={20} /></button>
                         <button onClick={handleResetScene} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'none', color: '#f87171', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Reiniciar Escena"><Trash2 size={20} /></button>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <button onClick={() => setView('side')} style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.5)', background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer' }}>X</button>
-                            <button onClick={() => setView('top')} style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.5)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer' }}>Y</button>
-                            <button onClick={() => setView('front')} style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid rgba(59,130,246,0.5)', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer' }}>Z</button>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+                            <button onClick={() => setView('side')} style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.5)', background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>X</button>
+                            <button onClick={() => setView('top')} style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.5)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Y</button>
+                            <button onClick={() => setView('front')} style={{ width: '40px', height: '40px', borderRadius: '8px', border: '1px solid rgba(59,130,246,0.5)', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Z</button>
                         </div>
-                        <button onClick={() => setIsOrtho(!isOrtho)} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: isOrtho ? 'rgba(255,255,255,0.1)' : 'none', color: isOrtho ? '#3b82f6' : '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Perspectiva/Orto">{isOrtho ? <Boxes size={20} /> : <Grid2X2 size={20} />}</button>
+                        <button onClick={() => setIsOrtho(!isOrtho)} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: isOrtho ? 'rgba(255,255,255,0.1)' : 'none', color: isOrtho ? '#3b82f6' : '#9ca3af', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Perspectiva/Orto">{isOrtho ? <Boxes size={20} /> : <Grid2X2 size={20} />}</button>
                     </div>
 
                     {/* SELECTION MODES */}
                     <div style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <button onClick={() => setSelectionMode('cursor')} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: selectionMode === 'cursor' ? 'rgba(255,255,255,0.1)' : 'none', color: selectionMode === 'cursor' ? '#3b82f6' : '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Selección Cursor"><MousePointer2 size={20} /></button>
-                        <button onClick={() => setSelectionMode('box')} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: selectionMode === 'box' ? 'rgba(255,255,255,0.1)' : 'none', color: selectionMode === 'box' ? '#3b82f6' : '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Caja de Selección"><Scan size={20} /></button>
+                        <button onClick={() => setSelectionMode('cursor')} style={{ width: '40px', height: '40px', borderRadius: '8px', background: selectionMode === 'cursor' ? 'rgba(34,136,255,0.2)' : 'none', color: selectionMode === 'cursor' ? '#3b82f6' : '#9ca3af', border: selectionMode === 'cursor' ? '1px solid rgba(34,136,255,0.4)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Selección Cursor"><MousePointer2 size={20} /></button>
+                        <button onClick={() => setSelectionMode('box')} style={{ width: '40px', height: '40px', borderRadius: '8px', background: selectionMode === 'box' ? 'rgba(34,136,255,0.2)' : 'none', color: selectionMode === 'box' ? '#3b82f6' : '#9ca3af', border: selectionMode === 'box' ? '1px solid rgba(34,136,255,0.4)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Caja de Selección"><Scan size={20} /></button>
                     </div>
 
                     {/* SNAP TOOL */}
                     <div style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <button onClick={() => handleLiteMessage()} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'none', color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Snap (Imán)"><Magnet size={20} /></button>
+                        <button onClick={() => handleLiteMessage()} style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Snap (Imán)"><Magnet size={20} /></button>
                     </div>
 
                     {/* SCENE CONFIG TOOL */}
@@ -845,7 +890,7 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                                 }}
                                 title="Configuración de Escena"
                             >
-                                <ImageIcon size={20} />
+                                <ImageIcon size={20} color="#9ca3af" />
                             </button>
 
                             {activeMenu === 'scene' && (
@@ -896,155 +941,325 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                 </div>
 
                 {/* PANELES DERECHOS */}
-                {activeRightTab === 'objects' && (
-                    <div className="custom-scrollbar" style={{ position: 'absolute', right: '72px', top: '88px', width: '280px', maxHeight: '70vh', backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', pointerEvents: 'auto' }}>
-                        <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#888' }}>OBJETOS EN ESCENA</span>
-                            <span style={{ fontSize: '10px', color: '#666', background: 'black', padding: '2px 6px', borderRadius: '10px' }}>{objects.length}</span>
-                        </div>
-                        <div style={{ padding: '8px' }}>
-                            {objects.map(obj => (
-                                <button
-                                    key={obj.id}
-                                    onClick={() => setSelectedIds([obj.id])}
-                                    style={{
-                                        width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px',
-                                        background: selectedIds.includes(obj.id) ? 'rgba(0,122,251,0.1)' : 'transparent',
-                                        border: selectedIds.includes(obj.id) ? '1px solid rgba(0,122,251,0.3)' : '1px solid transparent',
-                                        borderRadius: '8px', color: '#ccc', cursor: 'pointer', textAlign: 'left', marginBottom: '4px'
-                                    }}
-                                >
-                                    <div style={{ width: '28px', height: '28px', background: selectedIds.includes(obj.id) ? '#007AFB' : 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {getShapeIcon(obj.type)}
-                                    </div>
-                                    <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{obj.name}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {activeRightTab === 'inspector' && (
-                    <div className="custom-scrollbar" style={{ position: 'absolute', right: '72px', top: '88px', width: '280px', maxHeight: '80vh', backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', pointerEvents: 'auto' }}>
-                        <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#888' }}>
-                                {selectedIds.length > 1 ? `${selectedIds.length} OBJETOS` : 'INSPECTOR'}
-                            </span>
-                            {selectedIds.length > 0 && <div style={{ display: 'flex', gap: '4px' }}>
-                                <button onClick={() => duplicateSelected()} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px' }}><Copy size={14} /></button>
-                                <button onClick={() => deleteSelected()} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px' }}><Trash2 size={14} /></button>
-                            </div>}
-                        </div>
-                        {selectedIds.length > 0 ? (
-                            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-                                {selectedIds.length === 1 && firstSelected && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>NOMBRE</label>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px' }}>
-                                            <Tag size={14} color="#666" />
-                                            <input value={firstSelected.name} onChange={(e) => updateObject(firstSelected.id, { name: e.target.value })} style={{ background: 'none', border: 'none', color: 'white', fontSize: '12px', outline: 'none', width: '100%' }} />
+                {
+                    activeRightTab === 'objects' && (
+                        <div className="custom-scrollbar" style={{ position: 'absolute', right: '72px', top: '88px', width: '280px', maxHeight: '70vh', backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', pointerEvents: 'auto' }}>
+                            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#888' }}>OBJETOS EN ESCENA</span>
+                                <span style={{ fontSize: '10px', color: '#666', background: 'black', padding: '2px 6px', borderRadius: '10px' }}>{objects.length}</span>
+                            </div>
+                            <div style={{ padding: '8px' }}>
+                                {objects.map(obj => (
+                                    <button
+                                        key={obj.id}
+                                        onClick={() => setSelectedIds([obj.id])}
+                                        style={{
+                                            width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px',
+                                            background: selectedIds.includes(obj.id) ? 'rgba(0,122,251,0.1)' : 'transparent',
+                                            border: selectedIds.includes(obj.id) ? '1px solid rgba(0,122,251,0.3)' : '1px solid transparent',
+                                            borderRadius: '8px', color: '#ccc', cursor: 'pointer', textAlign: 'left', marginBottom: '4px'
+                                        }}
+                                    >
+                                        <div style={{ width: '28px', height: '28px', background: selectedIds.includes(obj.id) ? '#007AFB' : 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {getShapeIcon(obj.type)}
                                         </div>
-                                        <button onClick={() => handleLiteMessage()} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#ccc', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}><Backpack size={14} /> Guardar en Mochila</button>
-                                    </div>
-                                )}
+                                        <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{obj.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )
+                }
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>TRANSFORMACIÓN</label>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px' }}>
-                                        <button onClick={() => setTransformMode('translate')} style={{ padding: '8px', background: transformMode === 'translate' ? 'rgba(0,122,251,0.2)' : 'rgba(255,255,255,0.05)', border: transformMode === 'translate' ? '1px solid #007AFB' : '1px solid transparent', borderRadius: '10px', color: transformMode === 'translate' ? '#007AFB' : '#666', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><Move size={16} /> <span style={{ fontSize: '8px' }}>Mover</span></button>
-                                        <button onClick={() => setTransformMode('rotate')} style={{ padding: '8px', background: transformMode === 'rotate' ? 'rgba(0,122,251,0.2)' : 'rgba(255,255,255,0.05)', border: transformMode === 'rotate' ? '1px solid #007AFB' : '1px solid transparent', borderRadius: '10px', color: transformMode === 'rotate' ? '#007AFB' : '#666', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><RotateCw size={16} /><span style={{ fontSize: '8px' }}>Rotar</span></button>
-                                        <button onClick={() => setTransformMode('scale')} style={{ padding: '8px', background: transformMode === 'scale' ? 'rgba(0,122,251,0.2)' : 'rgba(255,255,255,0.05)', border: transformMode === 'scale' ? '1px solid #007AFB' : '1px solid transparent', borderRadius: '10px', color: transformMode === 'scale' ? '#007AFB' : '#666', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><Maximize size={16} /><span style={{ fontSize: '8px' }}>Escalar</span></button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                        <button onClick={() => selectedIds.forEach(id => updateObject(id, { position: [objects.find(o => o.id === id)!.position[0], 0, objects.find(o => o.id === id)!.position[2]] }))} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px', borderRadius: '8px', color: '#888', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer' }} title="Bajar al suelo"><ArrowDownToLine size={12} /> Bajar</button>
-                                        <button onClick={() => selectedIds.forEach(id => updateObject(id, { position: [0, 0, 0] }))} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px', borderRadius: '8px', color: '#888', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer' }} title="Mover al origen"><Target size={12} /> Origen</button>
-                                    </div>
-                                </div>
+                {
+                    activeRightTab === 'inspector' && (
+                        <div className="custom-scrollbar" style={{ position: 'absolute', right: '72px', top: '88px', width: '280px', maxHeight: '80vh', backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', pointerEvents: 'auto' }}>
+                            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#888' }}>
+                                    {selectedIds.length > 1 ? `${selectedIds.length} OBJETOS` : 'INSPECTOR'}
+                                </span>
+                                {selectedIds.length > 0 && <div style={{ display: 'flex', gap: '4px' }}>
+                                    <button onClick={() => duplicateSelected()} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px' }}><Copy size={14} /></button>
+                                    <button onClick={() => deleteSelected()} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px' }}><Trash2 size={14} /></button>
+                                </div>}
+                            </div>
+                            {selectedIds.length > 0 ? (
+                                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>BOOLEANOS</label>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                        <button
-                                            onClick={() => {
-                                                const first = objects.find(o => o.id === selectedIds[0]);
-                                                const isHole = first?.color === '#ffffff4d';
-                                                updateMultiple(selectedIds, { color: isHole ? (first?.originalColor || '#007AFB') : '#ffffff4d', originalColor: isHole ? undefined : first?.color });
-                                            }}
-                                            style={{ background: objects.find(o => o.id === selectedIds[0])?.color === '#ffffff4d' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)', border: objects.find(o => o.id === selectedIds[0])?.color === '#ffffff4d' ? '1px solid white' : '1px solid rgba(255,255,255,0.1)', padding: '8px', borderRadius: '8px', color: '#ccc', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer' }}
-                                        >
-                                            <Eraser size={14} /> Hueco
-                                        </button>
-                                        <button
-                                            onClick={() => performBooleanOperation()}
-                                            disabled={selectedIds.length !== 2}
-                                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', borderRadius: '8px', color: selectedIds.length === 2 ? '#ccc' : '#444', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: selectedIds.length === 2 ? 'pointer' : 'not-allowed' }}
-                                        >
-                                            <Combine size={14} /> Unir/Restar
-                                        </button>
-                                        {selectedIds.length === 1 && firstSelected?.composition && (
+                                    {selectedIds.length === 1 && firstSelected && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>NOMBRE</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px' }}>
+                                                <Tag size={14} color="#666" />
+                                                <input value={firstSelected.name} onChange={(e) => updateObject(firstSelected.id, { name: e.target.value })} style={{ background: 'none', border: 'none', color: 'white', fontSize: '12px', outline: 'none', width: '100%' }} />
+                                            </div>
+                                            <button onClick={() => handleLiteMessage()} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', color: '#666', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', opacity: 0.6 }}><Backpack size={14} /> Guardar en Mochila</button>
+                                        </div>
+                                    )}
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>TRANSFORMACIÓN</label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px' }}>
+                                            <button onClick={() => setTransformMode('translate')} style={{ padding: '8px', background: transformMode === 'translate' ? 'rgba(0,122,251,0.2)' : 'rgba(255,255,255,0.05)', border: transformMode === 'translate' ? '1px solid #007AFB' : '1px solid transparent', borderRadius: '10px', color: transformMode === 'translate' ? '#007AFB' : '#666', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><Move size={16} /> <span style={{ fontSize: '8px' }}>Mover</span></button>
+                                            <button onClick={() => handleLiteMessage()} style={{ padding: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid transparent', borderRadius: '10px', color: '#444', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', opacity: 0.5 }}><RotateCw size={16} /><span style={{ fontSize: '8px' }}>Rotar</span></button>
+                                            <button onClick={() => handleLiteMessage()} style={{ padding: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid transparent', borderRadius: '10px', color: '#444', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', opacity: 0.5 }}><Maximize size={16} /><span style={{ fontSize: '8px' }}>Escalar</span></button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                            <button onClick={() => handleLiteMessage()} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '6px', borderRadius: '8px', color: '#444', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer', opacity: 0.5 }} title="Bajar al suelo"><ArrowDownToLine size={12} /> Bajar</button>
+                                            <button onClick={() => handleLiteMessage()} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '6px', borderRadius: '8px', color: '#444', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer', opacity: 0.5 }} title="Mover al origen"><Target size={12} /> Origen</button>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>BOOLEANOS</label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                             <button
-                                                onClick={() => ungroupObject(selectedIds[0])}
-                                                style={{ gridColumn: 'span 2', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', borderRadius: '8px', color: '#ccc', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer' }}
-                                            >
-                                                <X size={14} /> Separar
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                    <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>APARIENCIA</label>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#666' }}><Palette size={12} /> COLOR</div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-                                        {PRESET_COLORS.map(c => (
-                                            <button
-                                                key={c}
-                                                onClick={() => updateMultiple(selectedIds, { color: c })}
-                                                style={{
-                                                    width: '100%', aspectRatio: '1/1', background: c,
-                                                    border: selectedIds.length === 1 && firstSelected?.color === c ? '2px solid white' : 'none',
-                                                    borderRadius: '6px', cursor: 'pointer'
+                                                onClick={() => handleLiteMessage()} // DISABLED FOR DEMO - ORIGINAL LOGIC PRESERVED
+                                                /* ORIGINAL LOGIC:
+                                                onClick={() => {
+                                                    const currentHole = !!firstSelected?.isHole;
+                                                    updateMultiple(selectedIds, { isHole: !currentHole });
                                                 }}
-                                            />
-                                        ))}
+                                                */
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.02)',
+                                                    border: '1px solid rgba(255,255,255,0.05)',
+                                                    padding: '8px',
+                                                    borderRadius: '8px',
+                                                    color: '#444',
+                                                    fontSize: '11px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '6px',
+                                                    cursor: 'pointer',
+                                                    opacity: 0.5
+                                                }}
+                                            >
+                                                <Eraser size={14} /> Hueco
+                                            </button>
+                                            <button
+                                                onClick={() => handleLiteMessage()} // DISABLED FOR DEMO - ORIGINAL LOGIC PRESERVED
+                                                /* ORIGINAL LOGIC:
+                                                onClick={() => performBooleanOperation()}
+                                                */
+                                                disabled={false} // Always clickable to show alert
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.02)',
+                                                    border: '1px solid rgba(255,255,255,0.05)',
+                                                    padding: '8px',
+                                                    borderRadius: '8px',
+                                                    color: '#444',
+                                                    fontSize: '11px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '6px',
+                                                    cursor: 'pointer', // Check cursor policy
+                                                    opacity: 0.5
+                                                }}
+                                            >
+                                                <Combine size={14} /> Unir/Restar
+                                            </button>
+                                            {selectedIds.length === 1 && firstSelected?.composition && (
+                                                <button
+                                                    onClick={() => handleLiteMessage()} // DISABLED FOR DEMO
+                                                    /* ORIGINAL LOGIC: onClick={() => ungroupObject(selectedIds[0])} */
+                                                    style={{ gridColumn: 'span 2', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px', color: '#444', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer', opacity: 0.5 }}
+                                                >
+                                                    <X size={14} /> Separar
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#666', marginTop: '8px' }}><ImageIcon size={12} /> TEXTURA</div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
-                                        {TEXTURES.map(t => (
-                                            <div
-                                                key={t.name}
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        <label style={{ fontSize: '10px', color: '#666', fontWeight: 'bold' }}>APARIENCIA</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#666' }}><Palette size={12} /> COLOR</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                                            {PRESET_COLORS.map(c => (
+                                                <button
+                                                    key={c}
+                                                    onClick={() => updateMultiple(selectedIds, { color: c })}
+                                                    style={{
+                                                        width: '100%', aspectRatio: '1/1', background: c,
+                                                        border: selectedIds.length === 1 && firstSelected?.color === c ? '2px solid white' : '1px solid rgba(255,255,255,0.1)',
+                                                        borderRadius: '8px', cursor: 'pointer'
+                                                    }}
+                                                />
+                                            ))}
+                                            <button
                                                 onClick={() => handleLiteMessage()}
                                                 style={{
-                                                    width: '100%',
-                                                    aspectRatio: '1/1',
-                                                    backgroundImage: `url(${t.url})`,
-                                                    backgroundSize: 'cover',
-                                                    borderRadius: '6px',
-                                                    cursor: 'pointer',
-                                                    border: '1px solid rgba(255,255,255,0.05)',
-                                                    position: 'relative'
+                                                    width: '100%', aspectRatio: '1/1',
+                                                    background: 'conic-gradient(from 0deg, red, yellow, lime, aqua, blue, magenta, red)',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    backgroundClip: 'padding-box',
+                                                    borderRadius: '8px', cursor: 'pointer',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    opacity: 0.8
                                                 }}
-                                                title={t.name}
-                                            />
-                                        ))}
+                                                title="Color Personalizado (Pro)"
+                                            >
+                                                <Plus size={14} color="white" style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }} />
+                                            </button>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#666', marginTop: '8px' }}><ImageIcon size={12} /> TEXTURA</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                                            {TEXTURES.map(t => (
+                                                <div
+                                                    key={t.name}
+                                                    onClick={() => handleLiteMessage()}
+                                                    style={{
+                                                        width: '100%',
+                                                        aspectRatio: '1/1',
+                                                        backgroundImage: `url(${t.url})`,
+                                                        backgroundSize: 'cover',
+                                                        borderRadius: '6px',
+                                                        cursor: 'not-allowed',
+                                                        border: '1px solid rgba(255,255,255,0.05)',
+                                                        position: 'relative',
+                                                        opacity: 0.6,
+                                                        filter: 'grayscale(0.7) contrast(0.9)'
+                                                    }}
+                                                    title={`${t.name} (Desactivado)`}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', color: '#444', gap: '12px' }}>
-                                <MousePointer2 size={32} />
-                                <span style={{ fontSize: '12px', textAlign: 'center' }}>Selecciona uno o varios objetos para ver sus propiedades</span>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
+                            ) : (
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', color: '#444', gap: '12px' }}>
+                                    <MousePointer2 size={32} />
+                                    <span style={{ fontSize: '12px', textAlign: 'center' }}>Selecciona uno o varios objetos para ver sus propiedades</span>
+                                </div>
+                            )}
+                        </div>
+                    )
+                }
+            </div >
 
             {/* BOTTOM STATUS */}
-            <div style={{ position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 24px', fontSize: '12px', color: '#9ca3af', pointerEvents: 'auto' }}>
+            < div style={{ position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 24px', fontSize: '12px', color: '#9ca3af', pointerEvents: 'auto' }}>
                 {selectionMode === 'box' ? "Modo Caja de Selección activa: Arrastra para encerrar objetos." : selectedIds.length > 0 ? `${selectedIds.length} objeto${selectedIds.length > 1 ? 's' : ''} seleccionado${selectedIds.length > 1 ? 's' : ''}.` : "Haz clic en una figura para seleccionarla (Shift para múltiple)."}
-            </div>
+            </div >
+
+            {/* --- PREMIUM MODAL --- */}
+            {
+                isPremiumOpen && (
+                    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, pointerEvents: 'auto' }}>
+                        <div style={{ backgroundColor: '#111', borderRadius: '24px', padding: '32px', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', width: '90%', maxWidth: '440px', animation: 'slideIn 0.3s ease-out' }}>
+                            <button onClick={() => setIsPremiumOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
+                                <X size={24} />
+                            </button>
+
+                            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                                <div style={{ display: 'inline-flex', padding: '12px', borderRadius: '20px', backgroundColor: 'rgba(251, 191, 36, 0.1)', marginBottom: '16px' }}>
+                                    <Crown size={32} style={{ color: '#fbbf24' }} />
+                                </div>
+                                <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: 'white' }}>Funciones Premium</h2>
+                                <p style={{ color: '#9ca3af', fontSize: '14px', marginTop: '8px' }}>Desbloquea todo el potencial de Codemaker para tu centro</p>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                {[
+                                    { icon: <Box size={16} />, text: "Todas las figuras geométricas disponibles" },
+                                    { icon: <Move size={16} />, text: "Movimientos precisos, rotaciones y escalados" },
+                                    { icon: <Target size={16} />, text: "Coordenadas, ángulos y medidas exactas" },
+                                    { icon: <ImageIcon size={16} />, text: "Añadir texturas personalizadas" },
+                                    { icon: <Users size={16} />, text: "Crear aulas y cuentas de alumnos" },
+                                    { icon: <Cloud size={16} />, text: "Guardar proyectos en la nube" },
+                                    { icon: <Award size={16} />, text: "Evaluar y calificar proyectos" },
+                                    { icon: <Rocket size={16} />, text: "Gamificación y retos avanzados" },
+                                    { icon: <LayoutIcon size={16} />, text: "Acceso a todos los editores PRO" },
+                                ].map((item, i) => (
+                                    <div key={i} style={{
+                                        display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px',
+                                        backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px',
+                                        border: '1px solid rgba(255,255,255,0.05)', alignItems: 'center', textAlign: 'center'
+                                    }}>
+                                        <div style={{ color: '#60a5fa' }}>{item.icon}</div>
+                                        <span style={{ fontSize: '11px', color: '#d1d5db', lineHeight: '1.4' }}>{item.text}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* --- HELP MODAL --- */}
+            {
+                isHelpOpen && (
+                    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, pointerEvents: 'auto' }}>
+                        <div className="custom-scrollbar" style={{ backgroundColor: '#111', borderRadius: '24px', padding: '32px', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', width: '90%', maxWidth: '600px', maxHeight: '85vh', overflowY: 'auto', animation: 'slideIn 0.3s ease-out' }}>
+                            <button onClick={() => setIsHelpOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
+                                <X size={24} />
+                            </button>
+
+                            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                                <div style={{ display: 'inline-flex', padding: '12px', borderRadius: '20px', backgroundColor: 'rgba(59, 130, 246, 0.1)', marginBottom: '16px' }}>
+                                    <HelpCircle size={32} style={{ color: '#60a5fa' }} />
+                                </div>
+                                <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: 'white' }}>Guía de Modelado</h2>
+                                <p style={{ color: '#9ca3af', fontSize: '14px', marginTop: '8px' }}>Aprende a dominar el entorno 3D de Codemaker</p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                                {/* NAVEGACIÓN */}
+                                <section>
+                                    <h3 style={{ fontSize: '14px', color: '#60a5fa', fontWeight: 'bold', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>Navegación 3D</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                                        {[
+                                            { icon: <RotateCw size={18} />, title: "Orbitar", text: "Click derecho o Izquierdo (fondo)" },
+                                            { icon: <Move size={18} />, title: "Desplazar", text: "Click central o Shift + Click" },
+                                            { icon: <Maximize2 size={18} />, title: "Zoom", text: "Rueda del ratón" },
+                                        ].map((item, i) => (
+                                            <div key={i} style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                                                <div style={{ color: '#60a5fa', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>{item.icon}</div>
+                                                <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>{item.title}</div>
+                                                <div style={{ fontSize: '10px', color: '#666' }}>{item.text}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {/* HERRAMIENTAS */}
+                                <section>
+                                    <h3 style={{ fontSize: '14px', color: '#60a5fa', fontWeight: 'bold', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>Herramientas de Diseño</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {[
+                                            { icon: <Plus size={16} />, title: "Añadir", text: "Crea nuevas figuras 3D básicas en la escena." },
+                                            { icon: <MousePointer2 size={16} />, title: "Selección", text: "Haz click en objetos para editarlos. Shift para varios." },
+                                            { icon: <Move size={16} />, title: "Transformar", text: "Mueve, rota o escala objetos usando los controles." },
+                                            { icon: <Eraser size={16} />, title: "Huecos", text: "Convierte un objeto en hueco para restar volúmenes." },
+                                            { icon: <Combine size={16} />, title: "Booleanos", text: "Une o resta objetos seleccionando dos a la vez." },
+                                            { icon: <Eye size={16} />, title: "Vistas", text: "Cambia entre vista frontal, superior, lateral u orto." },
+                                        ].map((item, i) => (
+                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                <div style={{ padding: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', color: '#60a5fa' }}>{item.icon}</div>
+                                                <div>
+                                                    <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#d1d5db' }}>{item.title}</div>
+                                                    <div style={{ fontSize: '11px', color: '#666' }}>{item.text}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            </div>
+
+                            <button
+                                onClick={() => setIsHelpOpen(false)}
+                                style={{ width: '100%', marginTop: '32px', padding: '14px', background: '#007AFB', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#005bb8'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = '#007AFB'}
+                            >
+                                Entendido
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* ESTILOS GLOBALES */}
             <style dangerouslySetInnerHTML={{
@@ -1055,7 +1270,7 @@ const ModelingStudioLite: React.FC<{ onExit?: () => void }> = ({ onExit }) => {
                     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
                     canvas { touch-action: none; }
                 `}} />
-        </div>
+        </div >
     );
 };
 

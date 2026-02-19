@@ -1,0 +1,86 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Nav from "@/components/nav.astro";
+import Footer from "@/components/footer.astro";
+---
+
+<Layout title="Política de Privacidad | CodeMaker">
+  <Nav />
+  
+  <main class="pt-32 pb-20 px-6 bg-[#00030F]">
+    <div class="max-w-4xl mx-auto prose prose-invert prose-slate">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-10 text-center">Política de Privacidad</h1>
+      
+      <div class="space-y-8 text-slate-400 leading-relaxed">
+        <section>
+          <h2 class="text-2xl font-bold text-white mb-4">1. Responsable del Tratamiento</h2>
+          <p>
+            El responsable del tratamiento de los datos personales recogidos a través de la web es:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 mt-4">
+            <li><strong>Responsable:</strong> Daniel Pérez M.</li>
+            <li><strong>Email:</strong> info@codemaker.es</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-bold text-white mb-4">2. Finalidad del Tratamiento</h2>
+          <p>
+            Tratamos la información que nos facilitan las personas interesadas con el fin de:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 mt-4">
+            <li>Gestionar el envío de la información que nos soliciten a través de los formularios de contacto o WhatsApp.</li>
+            <li>Prestar los servicios educativos y de software ofrecidos por Codemaker.</li>
+            <li>Enviar comunicaciones sobre novedades, eventos o servicios relacionados con Codemaker (solo si se ha dado consentimiento previo).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-bold text-white mb-4">3. Base Legal para el Tratamiento</h2>
+          <p>
+            La base legal para el tratamiento de sus datos es el consentimiento del interesado al contactar con nosotros o contratar nuestros servicios. No se elaborarán perfiles comerciales en base a la información facilitada.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-bold text-white mb-4">4. Conservación de los Datos</h2>
+          <p>
+            Los datos personales proporcionados se conservarán mientras se mantenga la relación comercial o durante el tiempo necesario para cumplir con las obligaciones legales.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-bold text-white mb-4">5. Destinatarios</h2>
+          <p>
+            No se cederán datos a terceros, salvo obligación legal o necesidad técnica para la prestación del servicio (como proveedores de hosting o servicios de mensajería).
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-bold text-white mb-4">6. Derechos de los Interesados</h2>
+          <p>
+            Cualquier persona tiene derecho a obtener confirmación sobre si en Codemaker estamos tratando datos personales que les conciernan, o no. Las personas interesadas tienen derecho a:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 mt-4">
+            <li>Acceder a sus datos personales.</li>
+            <li>Solicitar la rectificación de los datos inexactos.</li>
+            <li>Solicitar su supresión cuando los datos ya no sean necesarios.</li>
+            <li>Solicitar la limitación u oposición de su tratamiento.</li>
+            <li>Solicitar la portabilidad de los datos.</li>
+          </ul>
+          <p class="mt-4">
+            Para ejercer estos derechos, puede enviar un correo electrónico a <strong>info@codemaker.es</strong> adjuntando copia de su DNI.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  section {
+    @apply border-b border-slate-900 pb-8 last:border-0;
+  }
+</style>

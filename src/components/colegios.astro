@@ -1,14 +1,37 @@
 ---
-import { colegios } from "../data/colegios";
+import { getSchools } from "@/lib/google-sheets";
 
-const centrosActivos = colegios.filter(c => c.status === 'live');
-const centrosPasados = colegios.filter(c => c.status === 'past');
+const allCentros = await getSchools();
+
+const centrosActivos = allCentros.filter(c => c.status === 'live');
+const centrosPasados = allCentros.filter(c => c.status === 'past');
 
 const levelColors = {
   Junior: "bg-green-500",
   Senior: "bg-orange-500",
   Master: "bg-blue-500",
 };
+
+// Function to get a meaningful acronym
+function getSchoolInitial(name: string) {
+  if (!name) return '?';
+  const parts = name.split(/\s+/);
+  const skipWords = [
+    'colegio', 'ceip', 'centro', 'escuela', 'ayuntamiento', 'ayto',
+    'de', 'la', 'el', 'en', 'y', 'del', 'los', 'las'
+  ];
+  
+  // Find all words that are not in skipWords
+  const meaningfulWords = parts.filter(p => !skipWords.includes(p.toLowerCase()));
+  
+  if (meaningfulWords.length === 0) return parts[0]?.charAt(0).toUpperCase() || '?';
+  
+  // Take first letter of each meaningful word, max 3 letters
+  return meaningfulWords
+    .slice(0, 3)
+    .map(word => word.charAt(0).toUpperCase())
+    .join('');
+}
 ---
 
 <section
@@ -26,21 +49,18 @@ const levelColors = {
       <ul role="list" class="grid gap-4">
         {centrosActivos.map((colegio) => (
           <li class="bg-slate-50 border border-slate-100 shadow-sm rounded-xl p-6 flex flex-col lg:flex-row items-center gap-6">
-            <div class="flex gap-x-4 flex-1 w-full lg:w-auto">
-              {colegio.logo ? (
-                <img 
-                  class="size-16 flex-none rounded-lg object-contain bg-white border border-slate-100 p-2" 
-                  src={colegio.logo} 
-                  alt={colegio.nombre} 
-                />
-              ) : (
-                <div class="size-16 flex-none rounded-lg bg-slate-200 flex items-center justify-center text-slate-400 font-bold uppercase text-xl">
-                  {colegio.nombre.charAt(0)}
-                </div>
-              )}
-              <div class="flex-auto">
-                <p class="text-lg font-bold text-gray-900">{colegio.nombre}</p>
-                <p class="mt-1 text-sm text-gray-500">{colegio.direccion}</p>
+            <div class="flex gap-x-4 flex-1 w-full lg:w-auto items-center">
+              <!-- Stylized Avatar instead of Image -->
+              <div 
+                class="size-16 flex-none rounded-xl flex items-center justify-center text-white font-black uppercase text-2xl shadow-inner border border-white/20"
+                style={`background-color: ${colegio.color || '#007AFB'}`}
+              >
+                {getSchoolInitial(colegio.nombre)}
+              </div>
+              
+              <div class="flex-auto flex flex-col justify-center">
+                <p class="text-lg font-bold text-gray-900 leading-tight">{colegio.nombre}</p>
+                {colegio.direccion && <p class="mt-1 text-sm text-gray-500">{colegio.direccion}</p>}
               </div>
             </div>
 
@@ -79,14 +99,14 @@ const levelColors = {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {centrosPasados.map((colegio) => (
           <div class="bg-white border border-slate-100 p-4 rounded-xl flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="size-10 flex-none rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 font-bold uppercase overflow-hidden p-1">
-               {colegio.logo ? (
-                <img src={colegio.logo} class="w-full h-full object-contain opacity-70" alt={colegio.nombre} />
-               ) : colegio.nombre.charAt(0)}
+            <div 
+              class="size-10 flex-none rounded-lg flex items-center justify-center text-white font-bold uppercase text-xs shadow-sm bg-slate-400"
+            >
+              {getSchoolInitial(colegio.nombre)}
             </div>
-            <div>
-              <p class="text-sm font-bold text-slate-800">{colegio.nombre}</p>
-              <p class="text-xs text-slate-500">{colegio.direccion}</p>
+            <div class="flex flex-col justify-center">
+              <p class="text-sm font-bold text-slate-800 leading-tight">{colegio.nombre}</p>
+              {colegio.direccion && <p class="text-xs text-slate-500 mt-0.5">{colegio.direccion}</p>}
             </div>
           </div>
         ))}

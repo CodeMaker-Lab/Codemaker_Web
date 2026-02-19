@@ -1,0 +1,47 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="404 - Página no encontrada">
+  <div class="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <!-- Background effects -->
+    <div class="absolute inset-0 bg-slate-950">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] animate-pulse"></div>
+      <div class="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-purple-500/20 rounded-full blur-[80px]"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-10 text-center space-y-8 max-w-2xl">
+      <div class="relative">
+        <h1 class="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 blur-sm absolute inset-0 select-none">
+          404
+        </h1>
+        <h1 class="text-9xl font-black text-white relative">
+          404
+        </h1>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-white">
+          ¡Ups! Te has perdido en el ciberespacio
+        </h2>
+        <p class="text-lg text-slate-300">
+          Parece que la página que buscas no existe o ha sido movida a otra dimensión.
+        </p>
+      </div>
+
+      <div class="pt-8">
+        <a 
+          href="/"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-lg shadow-blue-500/25"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          Volver al Inicio
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

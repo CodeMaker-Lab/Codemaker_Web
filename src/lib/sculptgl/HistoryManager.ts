@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+
 import { SculptMesh } from './Mesh';
 
 export interface HistoryState {

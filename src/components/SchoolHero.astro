@@ -1,5 +1,6 @@
 ---
 import LetterEffect from "./LetterEffect.astro";
+import TecnologiasSlide from "./TecnologiasSlide.astro";
 
 interface Props {
   schoolName: string;
@@ -7,7 +8,7 @@ interface Props {
   color: string;
 }
 
-const { schoolName, curso, color } = Astro.props;
+const { schoolName, color } = Astro.props;
 ---
 
 <section 
@@ -17,7 +18,7 @@ const { schoolName, curso, color } = Astro.props;
   <div class="max-w-5xl mx-auto space-y-8 py-16 md:py-10">
     <div class="flex flex-col lg:flex-row items-center gap-8 p-4">
       <!-- Text on the left -->
-      <div class="flex flex-col w-full lg:w-1/2 space-y-6 text-left">
+      <div class="flex flex-col w-full lg:w-1/2 space-y-4 text-left">
         <div class="mt-8">
           <img 
             src="/svg/Logo.svg" 
@@ -26,19 +27,19 @@ const { schoolName, curso, color } = Astro.props;
           />
         </div>
         
-        <div class="inline-flex items-center">
+        <p class="text-md md:text-2xl text-[var(--white-icon)]">
+          Proyecto de innovación educativa sobre programación, robótica, 3D e
+          inteligencia artificial.
+        </p>
+
+        <div class="flex">
           <span 
-            class="text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg"
-            style={`background-color: ${color};`}
+              class="text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap"
+              style={`background-color: ${color};`}
           >
-            {schoolName}
+              {schoolName}
           </span>
         </div>
-
-        <p class="text-lg md:text-2xl text-[var(--white-icon)] leading-relaxed">
-          Innovador proyecto educativo para aprender las tecnologías del futuro-presente: 
-          <span class="font-bold">Programación, Diseño 3D, Robótica, Inteligencia Artificial y Desarrollo de Videojuegos.</span>
-        </p>
       </div>
 
       <!-- LetterEffect on the right -->
@@ -47,6 +48,10 @@ const { schoolName, curso, color } = Astro.props;
       >
         <LetterEffect />
       </div>
+    </div>
+    
+    <div class="pt-0">
+      <TecnologiasSlide />
     </div>
   </div>
 </section>

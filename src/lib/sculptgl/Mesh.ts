@@ -87,7 +87,7 @@ export class SculptMesh {
 
         // Deduplicate
         for (let i = 0; i < count; i++) {
-            this.adjacency[i] = [...new Set(this.adjacency[i])];
+            this.adjacency[i] = Array.from(new Set(this.adjacency[i]));
         }
     }
 }

@@ -1,0 +1,175 @@
+---
+---
+
+<div id="pricing-modal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" id="pricing-modal-overlay"></div>
+  <div class="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 transform transition-all scale-95 opacity-0 duration-300 flex flex-col max-h-[90vh]" id="pricing-modal-content">
+    
+    <!-- Close Button -->
+    <button id="pricing-close-modal" class="absolute top-6 right-8 z-10 text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 p-2 rounded-full hover:bg-slate-100" aria-label="Cerrar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+
+    <!-- Header -->
+    <div class="p-8 md:p-10 text-center border-b border-slate-50">
+      <h3 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Planes y Licencias</h3>
+      <p class="text-slate-500 text-lg">Elige el plan que mejor se adapte a tu centro o necesidades</p>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 md:p-10 overflow-y-auto overflow-x-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- DEMO Plan -->
+        <div class="flex flex-col p-7 rounded-[2rem] bg-slate-50 border border-slate-100 transition-all hover:shadow-lg group">
+          <div class="mb-6 flex items-center gap-3">
+            <h4 class="text-2xl font-bold text-slate-900">DEMO</h4>
+            <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-md border border-blue-100">Gratis</span>
+          </div>
+          <ul class="space-y-4 mb-4 text-sm text-slate-600">
+            <li class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Sin registro previo</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Prueba desde la web nuestros principales editores</span>
+            </li>
+            <li class="flex items-start gap-3 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Versión limitada: en modo demo solo están disponibles algunos editores y solo con sus funcionalidades básicas. No está disponible la gestión de aulas/alumnos.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- BASIC Plan -->
+        <div class="flex flex-col p-7 rounded-[2rem] bg-blue-600 border border-blue-500 text-white transition-all hover:shadow-2xl hover:shadow-blue-200 relative overflow-hidden group">
+          <!-- Glow effect -->
+          <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+          
+          <div class="mb-6 flex items-center gap-3 relative z-10">
+            <h4 class="text-2xl font-bold">BASIC</h4>
+            <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-white/20 px-2 py-1 rounded-md border border-white/30">Gratis</span>
+          </div>
+          <ul class="space-y-4 mb-4 text-blue-50 relative z-10">
+            <li class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-200 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Panel de control con gestión de alumnos/aulas, asignación de tareas y evaluación</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-200 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Editores principales con sus funcionalidades básicas, perfectos para iniciarse</span>
+            </li>
+            <li class="flex items-start gap-3 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Editores básicos y sin opciones de personalización y gamificación</span>
+            </li>
+                        <li class="flex items-start gap-3 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Soporte y formación</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- PRO Plan -->
+        <div class="flex flex-col p-7 rounded-[2rem] bg-slate-900 border border-slate-800 text-white transition-all hover:shadow-xl group">
+          <div class="mb-6 flex items-center gap-3">
+            <h4 class="text-2xl font-bold">PRO</h4>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 px-2 py-1 rounded-md border border-slate-700">Consultar</span>
+          </div>
+          <ul class="space-y-4 mb-4 text-sm text-slate-400">
+            <li class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-300 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span class="text-slate-100">Acceso completo a todos los editores y todas sus funcionalidades</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-300 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span class="text-slate-100">Opciones de gamificación</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-300 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span class="text-slate-100">Contacto directo para soporte y formación</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-300 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span class="text-slate-100">Personalización y gamificación: adapta nuestras apps a tus necesidades y gamifica tus clases</span>
+              </li>
+            <li class="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-300 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span class="text-slate-100">Justificación curricular personalizada</span>
+              </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const pricingModal = document.getElementById('pricing-modal');
+  const pricingModalContent = document.getElementById('pricing-modal-content');
+  const pricingOverlay = document.getElementById('pricing-modal-overlay');
+  const pricingCloseBtn = document.getElementById('pricing-close-modal');
+
+  function openPricingModal() {
+    pricingModal?.classList.remove('hidden');
+    pricingModal?.classList.add('flex');
+    
+    // Trigger animation
+    setTimeout(() => {
+      pricingModalContent?.classList.remove('scale-95', 'opacity-0');
+      pricingModalContent?.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    // Disable body scroll
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePricingModal() {
+    pricingModalContent?.classList.add('scale-95', 'opacity-0');
+    pricingModalContent?.classList.remove('scale-100', 'opacity-100');
+    
+    setTimeout(() => {
+      pricingModal?.classList.add('hidden');
+      pricingModal?.classList.remove('flex');
+      document.body.style.overflow = '';
+    }, 300);
+  }
+
+  // Listen for trigger events
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const trigger = target.closest('.pricing-trigger');
+    if (trigger) {
+      e.preventDefault();
+      openPricingModal();
+    }
+
+    // Inside modal buttons
+    if (target.closest('.pricing-demo-btn')) {
+        closePricingModal();
+        // Redirect to apps section
+        window.location.hash = 'apps';
+    }
+
+    if (target.closest('.pricing-contact-btn')) {
+        closePricingModal();
+        // Trigger the contact modal (already has a general listener in its component)
+        setTimeout(() => {
+            const contactBtn = document.querySelector('.contact-trigger') as HTMLElement;
+            contactBtn?.click();
+        }, 350);
+    }
+  });
+
+  pricingOverlay?.addEventListener('click', closePricingModal);
+  pricingCloseBtn?.addEventListener('click', closePricingModal);
+
+  // Close on Escape
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !pricingModal?.classList.contains('hidden')) {
+      closePricingModal();
+    }
+  });
+</script>
